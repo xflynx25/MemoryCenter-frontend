@@ -1,0 +1,8 @@
+register button takes to different page
+register and login display loading button when clicked
+if register, takes back to login page
+if login, will take you to home page, by sending request to /home with token 
+
+no refresh token implemented
+garbage UI
+register / login seperateness & non-auto-login with register is clunky 
