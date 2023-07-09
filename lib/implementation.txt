@@ -6,3 +6,5 @@ if login, will take you to home page, by sending request to /home with token
 no refresh token implemented
 garbage UI
 register / login seperateness & non-auto-login with register is clunky 
+
+

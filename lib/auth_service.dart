@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
+import 'collection.dart';
 
 class AuthService with ChangeNotifier {
   Future<bool> register(String username, String password) async {
@@ -39,17 +40,27 @@ class AuthService with ChangeNotifier {
     return false;
   }
 
-  Future<String> getHomeData() async {
-    var url = Uri.parse('${Config.HOST}/api/home/');
+  Future<List<Collection>> getCollections() async {
+    var url = Uri.parse('${Config.HOST}/api/get_all_collections/');
     var prefs = await SharedPreferences.getInstance();
-    var token = prefs.getString('accessToken');
-    var response = await http.get(url, headers: {'Authorization': 'Bearer $token'});
+    var accessToken = prefs.getString('accessToken');
+
+    var response = await http.get(
+      url, 
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken"
+      }
+    );
 
     if (response.statusCode == 200) {
-      var data = json.decode(response.body);
-      return 'WELCOME USER ${data['username']}, YOUR CAREFULLY CHOSEN PASSWORD HASHES TO ${data['password']}';
+      List<dynamic> data = json.decode(response.body);
+      return data.map((item) => Collection.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load collections');
     }
-
-    return 'Error: ${response.body}';
   }
+
+
 }
+
