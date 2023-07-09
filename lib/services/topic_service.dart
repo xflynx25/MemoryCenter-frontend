@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'config.dart';
-import 'topic.dart';
+import '../utils/config.dart';
+import '../models/topic.dart';
 
 class TopicService {
   Future<List<Topic>> getAllTopics(int userId) async {

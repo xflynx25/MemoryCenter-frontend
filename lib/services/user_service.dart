@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'config.dart';
-import 'user.dart';
+import '../utils/config.dart';
+import '../models/user.dart';
 
 class UserService {
   Future<List<User>> getAllUsers() async {

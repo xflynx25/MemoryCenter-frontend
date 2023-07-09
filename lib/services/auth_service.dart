@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'config.dart';
-import 'collection.dart';
+import '../utils/config.dart';
+import '../models/collection.dart';
 
 class AuthService with ChangeNotifier {
   Future<bool> register(String username, String password) async {

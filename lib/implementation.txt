@@ -7,4 +7,5 @@ no refresh token implemented
 garbage UI
 register / login seperateness & non-auto-login with register is clunky 
 
-
+issue: used_id is not getting sent on the get_all_collections and topics, and somehow always returning zetas, and they should be private
+    so in other words, I think what is likely happening is that zeta cookie somehow always being sent, even when we log in other. 

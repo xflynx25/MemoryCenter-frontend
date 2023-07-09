@@ -1,4 +1,4 @@
-import 'topic.dart';
+import './topic.dart';
 
 class Collection {
   final int id;
