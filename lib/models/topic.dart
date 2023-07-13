@@ -1,9 +1,13 @@
+import './item.dart';
+
 class Topic {
   final int id;
   final int user;
   final String topicName;
   final String? description;
   final String visibility;
+  final List<Item> items;
+  //final List<Item> collections;
 
   Topic({
     required this.id,
@@ -11,6 +15,7 @@ class Topic {
     required this.topicName,
     this.description,
     required this.visibility,
+    required this.items
   });
 
   factory Topic.fromJson(Map<String, dynamic> json) {
@@ -20,6 +25,8 @@ class Topic {
       topicName: json['topic_name'],
       description: json['description'],
       visibility: json['visibility'],
+      items: (json['items'] as List).map((i) => Item.fromJson(i)).toList(),
     );
   }
 }
+

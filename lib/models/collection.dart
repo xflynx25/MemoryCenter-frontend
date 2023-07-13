@@ -24,7 +24,7 @@ class Collection {
       collectionName: json['collection_name'],
       description: json['description'],
       visibility: json['visibility'],
-      topics: (json['topics'] as List).map((i) => Topic.fromJson(i)).toList(),
+      topics: (json['topics'] as List).map((d) => Topic.fromJson(d)).toList(),
     );
   }
 }

@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'services/auth_service.dart';
 import 'pages/login_page.dart';
-import './pages/home_page.dart';
+import 'pages/home_page.dart';
 import 'pages/profile_page.dart';
+import 'pages/edit_collection_page.dart';
+import 'pages/edit_topic_page0.dart';
+import 'pages/edit_topic_page1.dart';
+import 'pages/edit_topic_page2.dart';
+
+import 'models/collection.dart';
+import 'models/topic.dart';
 
 import 'dart:developer' as developer;
 import 'package:logging/logging.dart';
@@ -35,6 +42,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false, 
       title: 'JWT Auth',
       initialRoute: '/',
       onGenerateRoute: (settings) {
@@ -53,6 +61,18 @@ class MyApp extends StatelessWidget {
         } else if (settings.name == '/profile') {
           final int userId = settings.arguments as int;
           return MaterialPageRoute(builder: (context) => ProfilePage(userId: userId));
+        } else if (settings.name == '/edit_topic0') {
+          final Topic topic = settings.arguments as Topic;
+          return MaterialPageRoute(builder: (context) => EditTopicPage0(topic: topic));
+        } else if (settings.name == '/edit_topic1') {
+          final Topic topic = settings.arguments as Topic;
+          return MaterialPageRoute(builder: (context) => EditTopicPage1(topic: topic));
+        } else if (settings.name == '/edit_topic2') {
+          final Topic topic = settings.arguments as Topic;
+          return MaterialPageRoute(builder: (context) => EditTopicPage2(topic: topic));
+        } else if (settings.name == '/edit_collection') {
+          final Collection collection = settings.arguments as Collection;
+          return MaterialPageRoute(builder: (context) => EditCollectionPage(collection: collection));
         }
         assert(false, 'Need to implement ${settings.name}');
         return null;
