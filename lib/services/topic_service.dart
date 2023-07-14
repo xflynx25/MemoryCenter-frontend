@@ -58,4 +58,29 @@ class TopicService {
     }
   }
 
+  Future<bool> createTopic(String topicName, String description, String visibility) async {
+    var url = Uri.parse('${Config.HOST}/api/create_topic/');
+
+    var prefs = await SharedPreferences.getInstance();
+    var accessToken = prefs.getString('accessToken');
+
+    var response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+      body: jsonEncode(<String, String>{
+        'topic_name': topicName,
+        'description': description,
+        'visibility': visibility,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      return true;
+    } else {
+      return false;
+    }
+}
 }

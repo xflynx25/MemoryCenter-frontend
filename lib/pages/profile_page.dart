@@ -24,6 +24,21 @@ class _ProfilePageState extends State<ProfilePage> {
   late Future<List<Collection>> futureCollections;
   late Future<User> futureUser;
 
+  final _topicNameController = TextEditingController();
+  final _topicDescriptionController = TextEditingController();
+  
+  final _collectionNameController = TextEditingController();
+  final _collectionDescriptionController = TextEditingController();
+  
+  @override
+  void dispose() {
+    _topicNameController.dispose();
+    _topicDescriptionController.dispose();
+    _collectionNameController.dispose();
+    _collectionDescriptionController.dispose();
+    super.dispose();
+  }
+
   void refreshData() {
     setState(() {
       futureUser = UserService().getUser(widget.userId);
@@ -77,7 +92,74 @@ class _ProfilePageState extends State<ProfilePage> {
                 },
               ),
 
-            Text('Topics', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
+
+              Row(
+                children: <Widget>[
+                  IconButton(
+                    icon: Icon(Icons.add, color: Colors.transparent), // Invisible Icon
+                    onPressed: () {},
+                  ),
+                  Spacer(),
+                  Text('Topics', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  IconButton(
+                    icon: Icon(Icons.add),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Create a new Topic'),
+                            content: Column(
+                              children: <Widget>[
+                                Container(
+                                  width: 200, // Adjust width as needed
+                                  child: TextField(
+                                    controller: _topicNameController,
+                                    decoration: InputDecoration(hintText: "Enter topic name"),
+                                  ),
+                                ),
+                                Container(
+                                  width: 200, // Adjust width as needed
+                                  child: TextField(
+                                    controller: _topicDescriptionController,
+                                    decoration: InputDecoration(hintText: "Enter description"),
+                                  ),
+                                ),
+                                // Add more fields if needed
+                              ],
+                            ),
+                            actions: <Widget>[
+                              TextButton(
+                                child: Text('Cancel'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                              TextButton(
+                                child: Text('Confirm'),
+                                onPressed: () async {
+                                  // Call createTopic function and pass the input values
+                                  var success = await TopicService().createTopic(
+                                    _topicNameController.text,
+                                    _topicDescriptionController.text,
+                                    'private', //visibility just defaulting rn
+                                  );
+                                  if(success) { //If newTopic is created successfully.
+                                    Navigator.of(context).pop(); //Close the dialog
+                                    refreshData();
+                                  }
+                                },
+                              ),
+
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                  Spacer(),
+                ],
+              ),
 
             
             DataFutureBuilder<Topic>(
@@ -144,7 +226,74 @@ class _ProfilePageState extends State<ProfilePage> {
               },
             ),
 
-            Text('Collections', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
+            Row(
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.add, color: Colors.transparent), // Invisible Icon
+                  onPressed: () {},
+                ),
+                Spacer(),
+                Text('Collections', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Create a new Collection'),
+                          content: Column(
+                            children: <Widget>[
+                              Container(
+                                width: 200, // Adjust width as needed
+                                child: TextField(
+                                  controller: _collectionNameController,
+                                  decoration: InputDecoration(hintText: "Enter collection name"),
+                                ),
+                              ),
+                              Container(
+                                width: 200, // Adjust width as needed
+                                child: TextField(
+                                  controller: _collectionDescriptionController,
+                                  decoration: InputDecoration(hintText: "Enter description"),
+                                ),
+                              ),
+                              // Add more fields if needed
+                            ],
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              child: Text('Cancel'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                            TextButton(
+                              child: Text('Confirm'),
+                              onPressed: () async {
+                                // Call createCollection function and pass the input values
+                                var success = await CollectionService().createCollection(
+                                  _collectionNameController.text,
+                                  _collectionDescriptionController.text,
+                                  'private', //visibility just defaulting rn
+                                );
+                                if(success) { //If newCollection is created successfully.
+                                  Navigator.of(context).pop(); //Close the dialog
+                                  refreshData();
+                                }
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+                Spacer(),
+              ],
+            ),
+
+
 
             DataFutureBuilder<Collection>(
               future: futureCollections,

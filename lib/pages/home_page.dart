@@ -13,12 +13,18 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late Future<List<User>> futureUsers;
   String search = '';
+  
+  void refreshData() {
+    setState(() {
+    futureUsers = UserService().getAllUsers();
+    });
+  }
 
   @override
   void initState() {
     _logger.info('HOMEPAGEINIT');
     super.initState();
-    futureUsers = UserService().getAllUsers();
+    refreshData();
   }
 
   @override
@@ -111,13 +117,8 @@ class _HomePageState extends State<HomePage> {
                             child: ListTile(
                               title: Text(filteredUsers[index].username),
                               subtitle: Text(filteredUsers[index].realname ?? ''),
-                              onTap: () {
-                                // Navigate to Profile Page using routes
-                                Navigator.pushNamed(
-                                  context,
-                                  '/profile',
-                                  arguments: filteredUsers[index].id,  // Pass userId as argument
-                                );
+                              onTap: () async { await Navigator.pushNamed(context, '/profile', arguments: filteredUsers[index].id);
+                                  refreshData();
                               },
                             ),
                           ),

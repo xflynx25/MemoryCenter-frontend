@@ -8,3 +8,5 @@ garbage UI
 register / login seperateness & non-auto-login with register is clunky 
 
 long term might want to do search on the server side
+
+for the home page auto refresh couldn't get it to work when you go from the search 
