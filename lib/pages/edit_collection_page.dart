@@ -1,7 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/editing_collection_topic.dart';
 import '../models/collection.dart';
 import '../models/topic.dart';
+import '../utils/config.dart';
 
 class EditCollectionPage extends StatefulWidget {
   final Collection collection;
@@ -16,6 +20,9 @@ class EditCollectionPage extends StatefulWidget {
 class _EditCollectionPageState extends State<EditCollectionPage> {
   late List<Topic> allTopics;
   List<EditingCollectionTopic> editingCollectionTopics = [];
+  bool _isSubmitting = false;
+  bool _showSuccess = false;
+  bool _showError = false;
 
   @override
   void initState() {
@@ -33,40 +40,62 @@ class _EditCollectionPageState extends State<EditCollectionPage> {
     ).toList();
   }
 
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: Text('Edit Collection (${widget.collection.collectionName})'),
-    ),
-    body: Padding(  
-      padding: EdgeInsets.symmetric(
-        vertical: MediaQuery.of(context).size.height * 0.05,
-        horizontal: MediaQuery.of(context).size.width * 0.2,
-      ),
-      child: FutureBuilder<List<Topic>>(
-        future: widget.futureTopics,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            allTopics = snapshot.data!;
-            return ListView.builder(
-              itemCount: allTopics.length,
-              itemBuilder: (context, index) {
-                Topic currentTopic = allTopics[index];
-                String status = _getTopicStatus(currentTopic);
-                return _buildTopicRow(currentTopic, status);
-              },
-            );
-          } else if (snapshot.hasError) {
-            return Center(child: Text('An error occurred'));
-          } else {
-            return Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
-    ),
-  );
-}
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Edit Collection (${widget.collection.collectionName})'),
+        ),
+        body: Padding(  
+          padding: EdgeInsets.symmetric(
+            vertical: MediaQuery.of(context).size.height * 0.05,
+            horizontal: MediaQuery.of(context).size.width * 0.2,
+          ),
+          child: FutureBuilder<List<Topic>>(
+            future: widget.futureTopics,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                allTopics = snapshot.data!;
+                return Column(
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if(!_isSubmitting) {
+                            submitChanges();
+                          }
+                        },
+                        child: _isSubmitting ? CircularProgressIndicator() : Text('Submit Changes'),
+                      ),
+                    ),
+                    if (_showSuccess)
+                      Text('Changes successfully submitted.', style: TextStyle(color: Colors.green)),
+                    if (_showError)
+                      Text('An error occurred while submitting changes.', style: TextStyle(color: Colors.red)),
+                      
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: allTopics.length,
+                        itemBuilder: (context, index) {
+                          Topic currentTopic = allTopics[index];
+                          String status = _getTopicStatus(currentTopic);
+                          return _buildTopicRow(currentTopic, status);
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              } else if (snapshot.hasError) {
+                return Center(child: Text('An error occurred'));
+              } else {
+                return Center(child: CircularProgressIndicator());
+              }
+            },
+          ),
+        ),
+      );
+    }
 
 String _getTopicStatus(Topic topic) {
   // Check if the topic exists in the editingCollectionTopics
@@ -107,6 +136,45 @@ void _setTopicStatus(Topic topic, String newStatus) {
     }
   });
 }
+
+Future<void> submitChanges() async {
+  setState(() {
+    _isSubmitting = true;
+    _showSuccess = false;
+    _showError = false;
+  });
+
+  var url = Uri.parse('${Config.HOST}/api/edit_topics_in_collection_full/');
+
+  var prefs = await SharedPreferences.getInstance();
+  var accessToken = prefs.getString('accessToken') ?? '';
+
+  var response = await http.post(
+    url,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $accessToken",
+    },
+    body: json.encode({
+      "collection_id": widget.collection.id,
+      "topics": editingCollectionTopics.map((topic) => {
+        "topic_id": topic.id,
+        "status": topic.isActive ? "active" : "inactive"
+      }).toList()
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    _showSuccess = true;
+  } else {
+    _showError = true;
+  }
+
+  setState(() {
+    _isSubmitting = false;
+  });
+}
+
 
 Widget _buildTopicRow(Topic topic, String status) {
   return Padding(
