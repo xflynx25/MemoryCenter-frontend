@@ -1,4 +1,4 @@
-import './topic.dart';
+import './collection_topic.dart';
 
 class Collection {
   final int id;
@@ -6,7 +6,7 @@ class Collection {
   final String collectionName;
   final String? description;
   final String visibility;
-  final List<Topic> topics;
+  final List<CollectionTopic> collectionTopics;
 
   Collection({
     required this.id,
@@ -14,7 +14,7 @@ class Collection {
     required this.collectionName,
     this.description,
     required this.visibility,
-    required this.topics,
+    required this.collectionTopics,
   });
 
   factory Collection.fromJson(Map<String, dynamic> json) {
@@ -24,7 +24,7 @@ class Collection {
       collectionName: json['collection_name'],
       description: json['description'],
       visibility: json['visibility'],
-      topics: (json['topics'] as List).map((d) => Topic.fromJson(d)).toList(),
+      collectionTopics: (json['topics'] as List).map((d) => CollectionTopic.fromJson(d)).toList(),
     );
   }
 }

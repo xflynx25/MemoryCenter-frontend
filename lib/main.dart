@@ -71,8 +71,13 @@ class MyApp extends StatelessWidget {
           final Topic topic = settings.arguments as Topic;
           return MaterialPageRoute(builder: (context) => EditTopicPage2(topic: topic));
         } else if (settings.name == '/edit_collection') {
-          final Collection collection = settings.arguments as Collection;
-          return MaterialPageRoute(builder: (context) => EditCollectionPage(collection: collection));
+          final Map arguments = settings.arguments as Map;
+          final Collection collection = arguments['collection'];
+          final futureTopics = arguments['topics'];
+          futureTopics.then((topics) {
+            _logger.warning('Number of topics: ${topics.length}');
+          });
+          return MaterialPageRoute(builder: (context) => EditCollectionPage(collection: collection, futureTopics: futureTopics));
         }
         assert(false, 'Need to implement ${settings.name}');
         return null;

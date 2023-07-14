@@ -377,11 +377,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ListView.builder(
                                   shrinkWrap: true,
                                   physics: NeverScrollableScrollPhysics(),
-                                  itemCount: collections[index].topics.length,
+                                  itemCount: collections[index].collectionTopics.length,
                                   itemBuilder: (BuildContext context, int innerIndex) {
                                     return ListTile(
-                                      title: Text(collections[index].topics[innerIndex].topicName),
-                                      subtitle: Text(collections[index].topics[innerIndex].description ?? ''),
+                                      title: Text(collections[index].collectionTopics[innerIndex].topicName),
+                                      subtitle: Text(collections[index].collectionTopics[innerIndex].isActive ? 'Active' : 'Inactive'),
                                       onTap: () {
                                         // Implementation when a topic is tapped
                                       },
@@ -397,8 +397,15 @@ class _ProfilePageState extends State<ProfilePage> {
                                       IconButton(
                                         icon: Icon(Icons.edit),
                                         onPressed: () async {
-                                            await Navigator.pushNamed(context, '/edit_collection', arguments: collections[index]);
-                                            refreshData();
+                                          await Navigator.pushNamed(
+                                            context, 
+                                            '/edit_collection', 
+                                            arguments: {
+                                              'collection': collections[index], 
+                                              'topics': futureTopics
+                                            }
+                                          );
+                                          refreshData();
                                         },
                                       ),
                                       IconButton(

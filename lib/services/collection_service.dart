@@ -5,6 +5,7 @@ import '../utils/config.dart';
 import '../models/collection.dart';
 
 
+
 class CollectionService {
   Future<List<Collection>> getAllCollections(int userId) async {
     var url = Uri.parse('${Config.HOST}/api/get_all_collections/$userId/');
