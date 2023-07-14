@@ -59,7 +59,18 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Profile'),
+          title: FutureBuilder<User>(
+            future: futureUser,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                return Text('Profile (${snapshot.data!.username})');
+              }
+            },
+          ),
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
@@ -206,17 +217,60 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ],
                                   ),
                                 ),
-                                (topics[index].visibility == 'private' || topics[index].visibility == 'global_edit') 
-                                  ? IconButton(
+
+                              (topics[index].visibility == 'private' || topics[index].visibility == 'global_edit')
+                              ? Row(
+                                  children: <Widget>[
+                                    IconButton(
                                       icon: Icon(Icons.edit),
                                       onPressed: () async {
                                           await Navigator.pushNamed(context, '/edit_topic0', arguments: topics[index]);
                                           refreshData();
                                       },
-                                    )
-                                  : Container(),  // Empty container for when the IconButton is not displayed
-                              ],
-                            ),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.delete),
+                                      onPressed: () async {
+                                        final confirm = await showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                              title: const Text('Confirm'),
+                                              content: const Text('Are you sure you want to delete this topic?'),
+                                              actions: <Widget>[
+                                                TextButton(
+                                                  onPressed: () => Navigator.of(context).pop(true),
+                                                  child: const Text('DELETE'),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () => Navigator.of(context).pop(false),
+                                                  child: const Text('CANCEL'),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+
+                                        if (confirm) {
+                                          final success = await TopicService().deleteTopic(topics[index].id);
+                                          if (success) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Topic deleted successfully')),
+                                            );
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Failed to delete topic')),
+                                            );
+                                          }
+                                          refreshData();
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                )
+                              : Container(),
+                          ],
+                        ),
                           ),
                         ),
                       ),
@@ -336,17 +390,60 @@ class _ProfilePageState extends State<ProfilePage> {
                                 )
                               ]
                                 ),),
-                                (collections[index].visibility == 'private' || collections[index].visibility == 'global_edit') 
-                                  ? IconButton(
-                                      icon: Icon(Icons.edit),
-                                      onPressed: () async {
-                                          await Navigator.pushNamed(context, '/edit_collection', arguments: collections[index]);
-                                          refreshData();
-                                      },
-                                    )
-                                  : Container(),  // Empty container for when the IconButton is not displayed
-                              ],
-                            ),
+                                
+                                (collections[index].visibility == 'private' || collections[index].visibility == 'global_edit')
+                                ? Row(
+                                    children: <Widget>[
+                                      IconButton(
+                                        icon: Icon(Icons.edit),
+                                        onPressed: () async {
+                                            await Navigator.pushNamed(context, '/edit_collection', arguments: collections[index]);
+                                            refreshData();
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.delete),
+                                        onPressed: () async {
+                                          final confirm = await showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                title: const Text('Confirm'),
+                                                content: const Text('Are you sure you want to delete this collection?'),
+                                                actions: <Widget>[
+                                                  TextButton(
+                                                    onPressed: () => Navigator.of(context).pop(true),
+                                                    child: const Text('DELETE'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () => Navigator.of(context).pop(false),
+                                                    child: const Text('CANCEL'),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+
+                                          if (confirm) {
+                                            final success = await CollectionService().deleteCollection(collections[index].id);
+                                            if (success) {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(content: Text('Collection deleted successfully')),
+                                              );
+                                            } else {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(content: Text('Failed to delete collection')),
+                                              );
+                                            }
+                                            refreshData();
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  )
+                                : Container(),
+                            ],
+                          ),
                           )
                         )
                       )

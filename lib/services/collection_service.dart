@@ -30,7 +30,7 @@ class CollectionService {
       throw Exception('Failed to load collections');
     }
   }
-  
+
   Future<bool> createCollection(String collectionName, String description, String visibility) async {
     var url = Uri.parse('${Config.HOST}/api/create_collection/');
 
@@ -51,6 +51,30 @@ class CollectionService {
     );
 
     if (response.statusCode == 201) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+Future<bool> deleteCollection(int collectionId) async {
+    var url = Uri.parse('${Config.HOST}/api/delete_collection/');
+
+    var prefs = await SharedPreferences.getInstance();
+    var accessToken = prefs.getString('accessToken');
+
+    var response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+      body: jsonEncode(<String, int>{
+        'collection_id': collectionId,
+      }),
+    );
+
+    if (response.statusCode == 200) {
       return true;
     } else {
       return false;
