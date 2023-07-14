@@ -24,43 +24,58 @@ class _ProfilePageState extends State<ProfilePage> {
   late Future<List<Collection>> futureCollections;
   late Future<User> futureUser;
 
+  void refreshData() {
+    setState(() {
+      futureUser = UserService().getUser(widget.userId);
+      futureTopics = TopicService().getAllTopics(widget.userId);
+      futureCollections = CollectionService().getAllCollections(widget.userId);
+    });
+  }
+
   @override
   void initState() {
     _logger.info('PROFILEPAGEINIT');
     super.initState();
-    futureTopics = TopicService().getAllTopics(widget.userId);
-    futureCollections = CollectionService().getAllCollections(widget.userId);
-    futureUser = UserService().getUser(widget.userId);
+    refreshData();
   }
+
 
   @override
   Widget build(BuildContext context) {
-    _logger.info('PROFILEPAGE');
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Profile'),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            FutureBuilder<User>(
-              future: futureUser,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else {
-                  return ListTile(
-                    leading: CircleAvatar(
-                      child: Text(snapshot.data!.username[0]),
-                    ),
-                    title: Text(snapshot.data!.username),
-                    subtitle: Text(snapshot.data!.realname ?? ''),
-                  );
-                }
-              },
-            ),
+        appBar: AppBar(
+          title: Text('Profile'),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              // This is called when the user presses the AppBar back button
+              // Refresh the data here too
+              refreshData();
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              FutureBuilder<User>(
+                future: futureUser,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    return ListTile(
+                      leading: CircleAvatar(
+                        child: Text(snapshot.data!.username[0]),
+                      ),
+                      title: Text(snapshot.data!.username),
+                      subtitle: Text(snapshot.data!.realname ?? ''),
+                    );
+                  }
+                },
+              ),
 
             Text('Topics', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
 
@@ -112,8 +127,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                 (topics[index].visibility == 'private' || topics[index].visibility == 'global_edit') 
                                   ? IconButton(
                                       icon: Icon(Icons.edit),
-                                      onPressed: () {
-                                        Navigator.pushNamed(context, '/edit_topic0', arguments: topics[index]);
+                                      onPressed: () async {
+                                          await Navigator.pushNamed(context, '/edit_topic0', arguments: topics[index]);
+                                          refreshData();
                                       },
                                     )
                                   : Container(),  // Empty container for when the IconButton is not displayed
@@ -128,9 +144,6 @@ class _ProfilePageState extends State<ProfilePage> {
               },
             ),
 
-
-
-
             Text('Collections', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
 
             DataFutureBuilder<Collection>(
@@ -143,7 +156,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   itemBuilder: (context, index) {
                     return Center(
                       child: Container(
-                        width: MediaQuery.of(context).size.width * 0.5, // 50% of screen width
+                        width: MediaQuery.of(context).size.width * 0.6, // 50% of screen width
                         child: Card(
                           child: Container(
                             decoration: BoxDecoration(
@@ -177,8 +190,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                 (collections[index].visibility == 'private' || collections[index].visibility == 'global_edit') 
                                   ? IconButton(
                                       icon: Icon(Icons.edit),
-                                      onPressed: () {
-                                        Navigator.pushNamed(context, '/edit_collection', arguments: collections[index]);
+                                      onPressed: () async {
+                                          await Navigator.pushNamed(context, '/edit_collection', arguments: collections[index]);
+                                          refreshData();
                                       },
                                     )
                                   : Container(),  // Empty container for when the IconButton is not displayed

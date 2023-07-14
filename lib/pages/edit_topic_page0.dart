@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/topic.dart';
 import '../models/editing_item.dart';
 import '../widgets/topic_editor.dart';
@@ -17,6 +20,9 @@ class _EditTopicPage0State extends State<EditTopicPage0> {
   late List<EditingItem> items;
   late List<TextEditingController> frontControllers;
   late List<TextEditingController> backControllers;
+  var _isSubmitting = false;
+  var _showSuccess = false;
+  var _showError = false;
 
   @override
   void initState() {
@@ -26,7 +32,6 @@ class _EditTopicPage0State extends State<EditTopicPage0> {
         .toList();
     frontControllers = items.map((item) => TextEditingController(text: item.front)).toList();
     backControllers = items.map((item) => TextEditingController(text: item.back)).toList();
-    // Start by adding 50 blank items to the list
     addItems(Config.EDIT_TOPIC_0_BLANK_ITEMS);
   }
 
@@ -39,6 +44,75 @@ class _EditTopicPage0State extends State<EditTopicPage0> {
       }
     });
   }
+
+  Future<void> submitChanges() async {
+    setState(() {
+      _isSubmitting = true;
+      _showSuccess = false;
+      _showError = false;
+    });
+
+    var url = Uri.parse('${Config.HOST}/api/edit_items_in_topic_full/');
+
+    var prefs = await SharedPreferences.getInstance();
+    var accessToken = prefs.getString('accessToken') ?? '';
+
+    var response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $accessToken",
+      },
+      body: json.encode({
+        "topic_id": widget.topic.id,
+        "items": items.map((item) => {
+          "id": item.id,
+          "front": item.front,
+          "back": item.back
+        }).toList()
+      }),
+    );
+
+    if (response.statusCode == 200) {
+        _showSuccess = true;
+
+        // Fetch the updated items
+        fetchUpdatedItems(accessToken);
+    } else {
+        _showError = true;
+    }
+
+    setState(() {
+      _isSubmitting = false;
+    });
+  }
+
+  Future<void> fetchUpdatedItems(String accessToken) async {
+      var response = await http.get(
+        Uri.parse('${Config.HOST}/api/get_topic_items/${widget.topic.id}/'),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $accessToken",
+        },
+      );
+
+      if (response.statusCode == 200) {
+          var responseBody = json.decode(response.body);
+          var updatedItems = responseBody["items"];
+          setState(() {
+              // Update items based on the server response
+              items = updatedItems.map(
+                  (item) => EditingItem(id: item["id"], front: item["front"], back: item["back"])
+              ).toList();
+          });
+      }
+  }
+
+
+void addMoreItems() {
+  addItems(Config.EDIT_TOPIC_0_BLANK_ITEMS);
+}
+
 @override
 Widget build(BuildContext context) {
   return TopicEditor(
@@ -46,49 +120,42 @@ Widget build(BuildContext context) {
     child: Center(
       child: Row(
         children: <Widget>[
-          // 30% width for buttons
           Expanded(
             flex: 3,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // 10% space from top
                 Spacer(flex: 1),
-                // Submit Changes Button
                 Expanded(
                   flex: 8,
                   child: ElevatedButton(
                     child: const Text('Submit changes', style: TextStyle(color: Colors.white)),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green, // Changed to green color
+                      backgroundColor: Colors.green,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(80), // rounder button
+                        borderRadius: BorderRadius.circular(80),
                       ),
                     ),
-                    onPressed: () {
-                      // Call your API to submit changes here
-                    },
+                    onPressed: _isSubmitting ? null : submitChanges,
                   ),
                 ),
-                // 80% space
+                Spacer(flex: 1),
+                if (_showSuccess) Icon(Icons.check_circle, color: Colors.green),
+                if (_showError) Icon(Icons.error, color: Colors.red),
                 Spacer(flex: 8),
-                // Add More Items Button
                 Expanded(
                   flex: 8,
                   child: ElevatedButton(
-                    child: const Text('Add ${Config.EDIT_TOPIC_0_BLANK_ITEMS} more blanks'),
+                    child: Text('Add ${Config.EDIT_TOPIC_0_BLANK_ITEMS} more blanks'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue, // Change this color to your preference
+                      backgroundColor: Colors.blue,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(80), // rounder button
+                        borderRadius: BorderRadius.circular(80),
                       ),
                     ),
-                    onPressed: () {
-                      addItems(Config.EDIT_TOPIC_0_BLANK_ITEMS);
-                    },
+                    onPressed: addMoreItems,
                   ),
                 ),
-                // 10% space from bottom
                 Spacer(flex: 1),
               ],
             ),
@@ -117,7 +184,7 @@ Widget build(BuildContext context) {
                             children: <Widget>[
                               Text(
                                 '${index+1}.',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 16.0, // Smaller font size
                                   color: Colors.black, // Change this color to your preference
                                 ),
