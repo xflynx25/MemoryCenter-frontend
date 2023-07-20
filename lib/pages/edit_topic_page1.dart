@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/topic.dart';
 import '../utils/config.dart';
+import '../widgets/topic_editor.dart';
+
 
 class EditTopicPage1 extends StatefulWidget {
   final Topic topic;
@@ -13,6 +15,7 @@ class EditTopicPage1 extends StatefulWidget {
   @override
   _EditTopicPage1State createState() => _EditTopicPage1State();
 }
+
 
 class _EditTopicPage1State extends State<EditTopicPage1> {
   TextEditingController _frontController = TextEditingController();
@@ -57,7 +60,6 @@ class _EditTopicPage1State extends State<EditTopicPage1> {
       ];
     });
 
-
     var response = await http.post(
       url,
       headers: {
@@ -83,11 +85,9 @@ class _EditTopicPage1State extends State<EditTopicPage1> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Edit Topic'),
-      ),
-      body: Padding(
+    return TopicEditor(
+      topic: widget.topic,
+      child: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[

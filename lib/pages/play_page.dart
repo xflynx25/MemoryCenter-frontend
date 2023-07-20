@@ -1,3 +1,4 @@
+import 'package:MemoryCenter_frontend/utils/config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/collection.dart';
@@ -51,7 +52,7 @@ void changeCard(int change) {
     var item = cardItems.removeAt(0);
     outbox.addScore(item.id, change); // Here
   }
-  if (cardItems.length == 1) {  // If there's only 1 card left, fetch new cards
+  if (cardItems.length == Config.FETCH_AT_HOW_MANY_LEFT) {  // If there's only 1 card left, fetch new cards
     _fetchCardItems();
   }
   setState(() {
@@ -107,7 +108,7 @@ void changeCard(int change) {
     
 
 
-    updateTimer = Timer.periodic(Duration(seconds: 15), (timer) {
+    updateTimer = Timer.periodic(Duration(seconds: Config.FETCH_INTERVAL), (timer) {
       _updateScores();
     });
   }
@@ -148,7 +149,7 @@ void changeCard(int change) {
   Future<void> _fetchCardItems() async {
     _logger.info('Fetching card items for collection ${widget.collection.id}');
     try {
-      List<CardItem> fetchedCardItems = await CollectionService().fetchNFromCollection(widget.collection.id, 10);
+      List<CardItem> fetchedCardItems = await CollectionService().fetchNFromCollection(widget.collection.id, Config.FETCH_NUMBER);
       if (fetchedCardItems.isEmpty && cardItems.isEmpty) {
         setState(() {
           errorMessage = 'No card items found for this collection.';

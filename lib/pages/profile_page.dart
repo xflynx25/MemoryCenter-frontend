@@ -397,7 +397,6 @@ class _ProfilePageState extends State<ProfilePage> {
               future: futureTopics,
               dataBuilder: (BuildContext context, List<Topic> topics) {
                 _logger.warning('IN ITEMBUILDER OF TOPICS');
-                _logger.warning(topics[0]);
                 return ListView.builder(
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
