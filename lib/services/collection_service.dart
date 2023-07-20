@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/config.dart';
 import '../models/collection.dart';
+import '../models/card_item.dart';
 
 
 
@@ -81,4 +82,28 @@ Future<bool> deleteCollection(int collectionId) async {
       return false;
     }
   }
+
+Future<List<CardItem>> fetchNFromCollection(int collectionId, int n) async {
+  var url = Uri.parse('${Config.HOST}/api/fetch_n_from_collection/?collection_id=$collectionId&n=$n');
+
+  var prefs = await SharedPreferences.getInstance();
+  var accessToken = prefs.getString('accessToken');
+
+  var response = await http.get(
+    url,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $accessToken",
+    },
+  );
+
+  if (response.statusCode == 200) {
+    List<dynamic> body = json.decode(response.body);
+    return body.map((dynamic item) => CardItem.fromJson(item)).toList();
+  } else if (response.statusCode == 405){
+    throw Exception('No More Items');
+    }else {
+    throw Exception('Failed to fetch card items');
+  }
+}
 }

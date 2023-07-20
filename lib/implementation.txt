@@ -10,3 +10,5 @@ register / login seperateness & non-auto-login with register is clunky
 long term might want to do search on the server side
 
 for the home page auto refresh couldn't get it to work when you go from the search 
+
+Of course, there is the problem when if you have one left, you might request multiple times before putting in your score. On the backend, we will reject the additional scores. 

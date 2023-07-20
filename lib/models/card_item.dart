@@ -1,22 +1,22 @@
-class Item {
+class CardItem {
   final int id;
+  final int score;
   final String front;
   final String back;
-  final int score;
 
-  Item({
+  CardItem({
     required this.id,
+    required this.score,
     required this.front,
     required this.back,
-    required this.score,
   });
 
-  factory Item.fromJson(Map<String, dynamic> json) {
-    return Item(
+  factory CardItem.fromJson(Map<String, dynamic> json) {
+    return CardItem(
       id: json['id'],
       front: json['front'],
       back: json['back'],
-      score: json['score'] ?? 0,
+      score: json['score'],
     );
   }
 }

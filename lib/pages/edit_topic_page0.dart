@@ -97,7 +97,7 @@ class _EditTopicPage0State extends State<EditTopicPage0> {
       );
 
       if (response.statusCode == 200) {
-          var responseBody = json.decode(response.body);
+          var responseBody = json.decode(utf8.decode(response.bodyBytes));
           var updatedItems = responseBody["items"];
           setState(() {
               // Update items based on the server response

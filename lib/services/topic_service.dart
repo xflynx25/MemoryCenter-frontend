@@ -5,6 +5,9 @@ import '../utils/config.dart';
 import '../models/topic.dart';
 import '../models/item.dart';
 
+import 'package:logging/logging.dart';
+final _logger = Logger('TopicLogging');
+
 class TopicService {
   Future<List<Topic>> getAllTopics(int userId) async {
     var url = Uri.parse('${Config.HOST}/api/get_all_topics/$userId/');
@@ -15,12 +18,15 @@ class TopicService {
     var response = await http.get(
       url,
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json; charset=utf-8",
         "Authorization": "Bearer $accessToken",
       },
     );
 
     if (response.statusCode == 200) {
+    _logger.info('response _alltopics: ');
+    _logger.info(response.body); // Add this line
+    _logger.info(response.headers['content-type']); // Add this line
       var data = json.decode(response.body);
       List<Topic> topics = [];
       for (var topic in data) {
@@ -41,12 +47,15 @@ class TopicService {
     var response = await http.get(
       url,
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json; charset=utf-8",
         "Authorization": "Bearer $accessToken",
       },
     );
 
     if (response.statusCode == 200) {
+    _logger.info('response _allitems: ');
+    _logger.info(response.body); // Add this line
+    _logger.info(response.headers['content-type']); // Add this line
       var data = json.decode(response.body);
       List<Item> items = [];
       for (var item in data) {

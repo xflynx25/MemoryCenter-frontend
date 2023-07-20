@@ -6,6 +6,7 @@ import '../services/topic_service.dart';
 import '../services/collection_service.dart';
 import '../services/user_service.dart';
 import '../widgets/data_future_builder.dart';
+import '../utils/config.dart';
 import 'package:logging/logging.dart';
 
 final _logger = Logger('PROFILEPAGE_Logging');
@@ -55,6 +56,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,24 +86,242 @@ class _ProfilePageState extends State<ProfilePage> {
         body: SingleChildScrollView(
           child: Column(
             children: <Widget>[
-              FutureBuilder<User>(
-                future: futureUser,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    return ListTile(
-                      leading: CircleAvatar(
-                        child: Text(snapshot.data!.username[0]),
-                      ),
-                      title: Text(snapshot.data!.username),
-                      subtitle: Text(snapshot.data!.realname ?? ''),
-                    );
-                  }
-                },
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: FutureBuilder<User>(
+                      future: futureUser,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else {
+                          return ListTile(
+                            leading: CircleAvatar(
+                              child: Text(snapshot.data!.username[0]),
+                            ),
+                            title: Text(snapshot.data!.username),
+                            subtitle: Text(snapshot.data!.realname ?? ''),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: Row(
+                      children: <Widget>[
+                        for (int i = 0; i < Config.SCORE_COLORS.length; i++)
+                          Expanded(
+                            child: ListTile(
+                              leading: Container(
+                                width: 24,
+                                height: 24,
+                                color: Config.SCORE_COLORS[i],
+                              ),
+                              title: Text(Config.SCORE_TEXTS[i]),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
+
+            Row(
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.add, color: Colors.transparent), // Invisible Icon
+                  onPressed: () {},
+                ),
+                Spacer(),
+                Text('Collections', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Create a new Collection'),
+                          content: Column(
+                            children: <Widget>[
+                              Container(
+                                width: 200, // Adjust width as needed
+                                child: TextField(
+                                  controller: _collectionNameController,
+                                  decoration: InputDecoration(hintText: "Enter collection name"),
+                                ),
+                              ),
+                              Container(
+                                width: 200, // Adjust width as needed
+                                child: TextField(
+                                  controller: _collectionDescriptionController,
+                                  decoration: InputDecoration(hintText: "Enter description"),
+                                ),
+                              ),
+                              // Add more fields if needed
+                            ],
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              child: Text('Cancel'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                            TextButton(
+                              child: Text('Confirm'),
+                              onPressed: () async {
+                                // Call createCollection function and pass the input values
+                                var success = await CollectionService().createCollection(
+                                  _collectionNameController.text,
+                                  _collectionDescriptionController.text,
+                                  'private', //visibility just defaulting rn
+                                );
+                                if(success) { //If newCollection is created successfully.
+                                  Navigator.of(context).pop(); //Close the dialog
+                                  refreshData();
+                                }
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+                Spacer(),
+              ],
+            ),
+
+            DataFutureBuilder<Collection>(
+              future: futureCollections,
+              dataBuilder: (BuildContext context, List<Collection> collections) {
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: collections.length,
+                  itemBuilder: (context, index) {
+                    return Center(
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.6,
+                        child: Card(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors.grey,
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: ExpansionTile(
+                                    title: Text(collections[index].collectionName),
+                                    children: <Widget>[
+                                      ListView.builder(
+                                        shrinkWrap: true,
+                                        physics: NeverScrollableScrollPhysics(),
+                                        itemCount: collections[index].collectionTopics.length,
+                                        itemBuilder: (BuildContext context, int innerIndex) {
+                                          return ListTile(
+                                            tileColor: collections[index].collectionTopics[innerIndex].isActive 
+                                                      ? Colors.green.withOpacity(0.2)   // light green for active
+                                                      : Colors.red.withOpacity(0.2),    // light red for inactive
+                                            title: Text(collections[index].collectionTopics[innerIndex].topicName),
+                                            subtitle: Text(collections[index].collectionTopics[innerIndex].isActive ? 'Active' : 'Inactive'),
+                                            onTap: () {
+                                              // Implementation when a topic is tapped
+                                            },
+                                          );
+                                        },
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                (collections[index].visibility == 'private' || collections[index].visibility == 'global_edit')
+                                ? Row(
+                                    children: <Widget>[
+                                      IconButton(
+                                        icon: Icon(Icons.edit),
+                                        onPressed: () async {
+                                          await Navigator.pushNamed(
+                                            context, 
+                                            '/edit_collection', 
+                                            arguments: {
+                                              'collection': collections[index], 
+                                              'topics': futureTopics
+                                            }
+                                          );
+                                          refreshData();
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.delete),
+                                        onPressed: () async {
+                                          final confirm = await showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                title: const Text('Confirm'),
+                                                content: const Text('Are you sure you want to delete this collection?'),
+                                                actions: <Widget>[
+                                                  TextButton(
+                                                    onPressed: () => Navigator.of(context).pop(true),
+                                                    child: const Text('DELETE'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () => Navigator.of(context).pop(false),
+                                                    child: const Text('CANCEL'),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+
+                                          if (confirm) {
+                                            final success = await CollectionService().deleteCollection(collections[index].id);
+                                            if (success) {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(content: Text('Collection deleted successfully')),
+                                              );
+                                            } else {
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(content: Text('Failed to delete collection')),
+                                              );
+                                            }
+                                            refreshData();
+                                          }
+                                        },
+                                      ),
+                                      // Add play button next to edit and delete buttons
+                                      IconButton(
+                                        icon: const Icon(Icons.play_arrow),  // Play icon
+                                        onPressed: () {
+                                          Navigator.pushNamed(
+                                            context, 
+                                            '/play_page', 
+                                            arguments: {'collection': collections[index]}
+                                          );
+                                          refreshData();
+                                        },
+                                      ),
+
+                                    ],
+                                  )
+                                : Container(),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+
 
 
               Row(
@@ -206,6 +426,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                         itemCount: topics[index].items.length,
                                         itemBuilder: (BuildContext context, int innerIndex) {
                                           return ListTile(
+                                            tileColor: Config.SCORE_COLORS[topics[index].items[innerIndex].score],
                                             title: Text(topics[index].items[innerIndex].front),
                                             subtitle: Text(topics[index].items[innerIndex].back),
                                             onTap: () {
@@ -213,6 +434,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                             },
                                           );
                                         },
+
                                       ),
                                     ],
                                   ),
@@ -269,8 +491,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                   ],
                                 )
                               : Container(),
-                          ],
-                        ),
+                            ],
+                          ),
                           ),
                         ),
                       ),
@@ -280,185 +502,7 @@ class _ProfilePageState extends State<ProfilePage> {
               },
             ),
 
-            Row(
-              children: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.add, color: Colors.transparent), // Invisible Icon
-                  onPressed: () {},
-                ),
-                Spacer(),
-                Text('Collections', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text('Create a new Collection'),
-                          content: Column(
-                            children: <Widget>[
-                              Container(
-                                width: 200, // Adjust width as needed
-                                child: TextField(
-                                  controller: _collectionNameController,
-                                  decoration: InputDecoration(hintText: "Enter collection name"),
-                                ),
-                              ),
-                              Container(
-                                width: 200, // Adjust width as needed
-                                child: TextField(
-                                  controller: _collectionDescriptionController,
-                                  decoration: InputDecoration(hintText: "Enter description"),
-                                ),
-                              ),
-                              // Add more fields if needed
-                            ],
-                          ),
-                          actions: <Widget>[
-                            TextButton(
-                              child: Text('Cancel'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                            TextButton(
-                              child: Text('Confirm'),
-                              onPressed: () async {
-                                // Call createCollection function and pass the input values
-                                var success = await CollectionService().createCollection(
-                                  _collectionNameController.text,
-                                  _collectionDescriptionController.text,
-                                  'private', //visibility just defaulting rn
-                                );
-                                if(success) { //If newCollection is created successfully.
-                                  Navigator.of(context).pop(); //Close the dialog
-                                  refreshData();
-                                }
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                ),
-                Spacer(),
-              ],
-            ),
 
-
-
-            DataFutureBuilder<Collection>(
-              future: futureCollections,
-              dataBuilder: (BuildContext context, List<Collection> collections) {
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: collections.length,
-                  itemBuilder: (context, index) {
-                    return Center(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 0.6, // 50% of screen width
-                        child: Card(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.grey,
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              children: <Widget>[
-                                Expanded(
-                                  child: ExpansionTile(
-                              title: Text(collections[index].collectionName),
-                              children: <Widget>[
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: collections[index].collectionTopics.length,
-                                  itemBuilder: (BuildContext context, int innerIndex) {
-                                    return ListTile(
-                                      title: Text(collections[index].collectionTopics[innerIndex].topicName),
-                                      subtitle: Text(collections[index].collectionTopics[innerIndex].isActive ? 'Active' : 'Inactive'),
-                                      onTap: () {
-                                        // Implementation when a topic is tapped
-                                      },
-                                    );
-                                  },
-                                )
-                              ]
-                                ),),
-                                
-                                (collections[index].visibility == 'private' || collections[index].visibility == 'global_edit')
-                                ? Row(
-                                    children: <Widget>[
-                                      IconButton(
-                                        icon: Icon(Icons.edit),
-                                        onPressed: () async {
-                                          await Navigator.pushNamed(
-                                            context, 
-                                            '/edit_collection', 
-                                            arguments: {
-                                              'collection': collections[index], 
-                                              'topics': futureTopics
-                                            }
-                                          );
-                                          refreshData();
-                                        },
-                                      ),
-                                      IconButton(
-                                        icon: Icon(Icons.delete),
-                                        onPressed: () async {
-                                          final confirm = await showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                title: const Text('Confirm'),
-                                                content: const Text('Are you sure you want to delete this collection?'),
-                                                actions: <Widget>[
-                                                  TextButton(
-                                                    onPressed: () => Navigator.of(context).pop(true),
-                                                    child: const Text('DELETE'),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () => Navigator.of(context).pop(false),
-                                                    child: const Text('CANCEL'),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-
-                                          if (confirm) {
-                                            final success = await CollectionService().deleteCollection(collections[index].id);
-                                            if (success) {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(content: Text('Collection deleted successfully')),
-                                              );
-                                            } else {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(content: Text('Failed to delete collection')),
-                                              );
-                                            }
-                                            refreshData();
-                                          }
-                                        },
-                                      ),
-                                    ],
-                                  )
-                                : Container(),
-                            ],
-                          ),
-                          )
-                        )
-                      )
-                    );
-                  },
-                );
-              },
-            ),
           ],
         ),
       ),

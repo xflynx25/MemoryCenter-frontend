@@ -8,6 +8,7 @@ import 'pages/edit_collection_page.dart';
 import 'pages/edit_topic_page0.dart';
 import 'pages/edit_topic_page1.dart';
 import 'pages/edit_topic_page2.dart';
+import 'pages/play_page.dart';
 
 import 'models/collection.dart';
 import 'models/topic.dart';
@@ -79,6 +80,16 @@ class MyApp extends StatelessWidget {
           });
           return MaterialPageRoute(builder: (context) => EditCollectionPage(collection: collection, futureTopics: futureTopics));
         }
+        else if (settings.name == '/play_page') {
+          if (settings.arguments != null) {
+            final Map arguments = settings.arguments as Map;
+            final Collection collection = arguments['collection'] as Collection;
+            return MaterialPageRoute(builder: (context) => PlayPage(collection: collection));
+          } else {
+            // Handle the case when arguments is null, e.g., navigate to an error page
+          }
+        }
+
         assert(false, 'Need to implement ${settings.name}');
         return null;
       },

@@ -5,7 +5,7 @@ class Loading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
+    return const AlertDialog(
       content: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
