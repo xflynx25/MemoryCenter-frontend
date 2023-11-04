@@ -97,12 +97,15 @@ class _ProfilePageState extends State<ProfilePage> {
                         } else if (snapshot.hasError) {
                           return Text('Error: ${snapshot.error}');
                         } else {
-                          return ListTile(
-                            leading: CircleAvatar(
-                              child: Text(snapshot.data!.username[0]),
+                          return FractionallySizedBox(
+                            widthFactor: 0.5, // 50% of the screen width
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                child: Text(snapshot.data!.username[0]),
+                              ),
+                              title: Text(snapshot.data!.username),
+                              subtitle: Text(snapshot.data!.realname ?? ''),
                             ),
-                            title: Text(snapshot.data!.username),
-                            subtitle: Text(snapshot.data!.realname ?? ''),
                           );
                         }
                       },
@@ -113,15 +116,19 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: <Widget>[
                         for (int i = 0; i < Config.SCORE_COLORS.length; i++)
                           Expanded(
-                            child: ListTile(
-                              leading: Container(
-                                width: 24,
-                                height: 24,
-                                color: Config.SCORE_COLORS[i],
+                            child: FractionallySizedBox(
+                              widthFactor: 1, // For example, 25% of the available space
+                              child: ListTile(
+                                leading: Container(
+                                  width: 24,
+                                  height: 24,
+                                  color: Config.SCORE_COLORS[i],
+                                ),
+                                title: Text(Config.SCORE_TEXTS[i]),
                               ),
-                              title: Text(Config.SCORE_TEXTS[i]),
                             ),
                           ),
+
                       ],
                     ),
                   ),
@@ -135,7 +142,10 @@ class _ProfilePageState extends State<ProfilePage> {
                   onPressed: () {},
                 ),
                 Spacer(),
-                Text('Collections', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.05),
+                  child: Text('Collections', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                ),
                 IconButton(
                   icon: Icon(Icons.add),
                   onPressed: () {

@@ -5,41 +5,64 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/config.dart';
 import '../models/collection.dart';
 
+
+class AuthResult {
+  final bool success;
+  final String errorMessage;
+
+  AuthResult(this.success, {this.errorMessage = ''});
+}
+
+
 class AuthService with ChangeNotifier {
-  Future<bool> register(String username, String password) async {
-    var url = Uri.parse('${Config.HOST}/api/register/');
+  Future<AuthResult> login(String username, String password) async {
+  var url = Uri.parse('${Config.HOST}/api/login/');
+  try {
     var response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
       body: json.encode({'username': username, 'password': password}),
     );
 
-    if (response.statusCode == 201) {
-      return true;
-    }
-
-    return false;
-  }
-
-  Future<bool> login(String username, String password) async {
-    var url = Uri.parse('${Config.HOST}/api/login/');
-    var response = await http.post(
-      url, 
-      headers: {"Content-Type": "application/json"},
-      body: json.encode({'username': username, 'password': password})
-    );
-
-    if (response.statusCode == 200) {
-      var data = json.decode(response.body);
+    var data = json.decode(response.body);
+    if (response.statusCode == 200 && data['status'] == 'success') {
       var prefs = await SharedPreferences.getInstance();
       prefs.setString('accessToken', data['access']);
       prefs.setString('refreshToken', data['refresh']);
-      return true;
+      return AuthResult(true);
+    } else {
+      // Handle the error message from the response if any
+      return AuthResult(false, errorMessage: data['error'] ?? 'Unknown error');
     }
-
-    return false;
+  } catch (e) {
+    // Handle the exception and log or show an appropriate message
+    debugPrint('Error: $e');
+    return AuthResult(false, errorMessage: e.toString());
   }
+}
 
+Future<AuthResult> register(String username, String password) async {
+  var url = Uri.parse('${Config.HOST}/api/register/');
+  try {
+    var response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({'username': username, 'password': password}),
+    );
+
+    var data = json.decode(response.body);
+    if (response.statusCode == 201 && data['status'] == 'success') {
+      return AuthResult(true);
+    } else {
+      // Handle the error message from the response if any
+      return AuthResult(false, errorMessage: data['error'] ?? 'Unknown error');
+    }
+  } catch (e) {
+    // Handle the exception and log or show an appropriate message
+    debugPrint('Error: $e');
+    return AuthResult(false, errorMessage: e.toString());
+  }
+}
   Future<List<Collection>> getCollections() async {
     var url = Uri.parse('${Config.HOST}/api/get_all_collections/');
     var prefs = await SharedPreferences.getInstance();
@@ -63,4 +86,3 @@ class AuthService with ChangeNotifier {
 
 
 }
-

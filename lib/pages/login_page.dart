@@ -46,22 +46,21 @@ class _LoginFormState extends State<LoginForm> {
           ),
           ElevatedButton(
             onPressed: () async {
-              _formKey.currentState!.save();
-              showDialog(
-                context: context,
-                builder: (context) => Loading(),
-              );
-              bool success = await Provider.of<AuthService>(context, listen: false)
-                  .login(_username, _password);
-              Navigator.pop(context); // Pop the loading dialog
-              if (success) {
-                Navigator.pushReplacementNamed(context, '/home');
-              } else {
-                // Show error message
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text('Login failed')));
-              }
-            },
+            _formKey.currentState!.save();
+            showDialog(
+              context: context,
+              builder: (context) => Loading(),
+            );
+            AuthResult result = await Provider.of<AuthService>(context, listen: false)
+                .login(_username, _password); // or .register for the RegisterForm
+            Navigator.pop(context); // Pop the loading dialog
+            if (result.success) {
+              Navigator.pushReplacementNamed(context, '/home');
+            } else {
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(result.errorMessage)));
+            }
+          },
             child: Text('Login'),
           ),
           ElevatedButton(
@@ -104,21 +103,21 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
           ElevatedButton(
             onPressed: () async {
-              _formKey.currentState!.save();
-              showDialog(
-                context: context,
-                builder: (context) => Loading(),
-              );
-              bool success = await Provider.of<AuthService>(context, listen: false)
-                  .register(_username, _password);
-              Navigator.pop(context); // Pop the loading dialog
-              if (success) {
-                Navigator.pushReplacementNamed(context, '/home');
-              } else {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text('Registration failed')));
-              }
-            },
+            _formKey.currentState!.save();
+            showDialog(
+              context: context,
+              builder: (context) => Loading(),
+            );
+            AuthResult result = await Provider.of<AuthService>(context, listen: false)
+                .login(_username, _password); // or .register for the RegisterForm
+            Navigator.pop(context); // Pop the loading dialog
+            if (result.success) {
+              Navigator.pushReplacementNamed(context, '/home');
+            } else {
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(result.errorMessage)));
+            }
+          },
             child: Text('Register'),
           ),
         ],

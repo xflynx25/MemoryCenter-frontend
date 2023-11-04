@@ -10,30 +10,35 @@ final _logger = Logger('TopicLogging');
 
 class TopicService {
   Future<List<Topic>> getAllTopics(int userId) async {
-    var url = Uri.parse('${Config.HOST}/api/get_all_topics/$userId/');
-    
-    var prefs = await SharedPreferences.getInstance();
-    var accessToken = prefs.getString('accessToken');
+    try {
+      var url = Uri.parse('${Config.HOST}/api/get_all_topics/$userId/');
+      var prefs = await SharedPreferences.getInstance();
+      var accessToken = prefs.getString('accessToken');
 
-    var response = await http.get(
-      url,
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        "Authorization": "Bearer $accessToken",
-      },
-    );
+      var response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          "Authorization": "Bearer $accessToken",
+        },
+      );
 
-    if (response.statusCode == 200) {
-    _logger.info('response _alltopics: ');
-    _logger.info(response.body); // Add this line
-    _logger.info(response.headers['content-type']); // Add this line
-      var data = json.decode(response.body);
-      List<Topic> topics = [];
-      for (var topic in data) {
-        topics.add(Topic.fromJson(topic));
+      if (response.statusCode == 200) {
+        _logger.info('response _alltopics: ');
+        _logger.info(response.body); // Add this line
+        _logger.info(response.headers['content-type']); // Add this line
+          var data = json.decode(response.body);
+          List<Topic> topics = [];
+          for (var topic in data) {
+            topics.add(Topic.fromJson(topic));
+          }
+          return topics;
+      } else {
+        throw Exception('Failed to load topics');
       }
-      return topics;
-    } else {
+    } catch (e) {
+      // Handle any exceptions that occur during the request
+      _logger.severe('Failed to get all topics', e);
       throw Exception('Failed to load topics');
     }
   }
