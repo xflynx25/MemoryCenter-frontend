@@ -1,6 +1,7 @@
 import '../models/user.dart';
 import '../services/user_service.dart';
 import '../widgets/data_future_builder.dart';
+import '../widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 final _logger = Logger('HOMEPAGE_Logging');
@@ -31,9 +32,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     _logger.info('HOMEPAGESTATE');
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Home'),
-        actions: <Widget>[
+      appBar: CustomAppBar(
+        title: 'Home',
+        actions: [
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
@@ -43,6 +44,7 @@ class _HomePageState extends State<HomePage> {
               );
             },
           ),
+          // You can add more actions if needed
         ],
       ),
       body: SingleChildScrollView(

@@ -85,4 +85,16 @@ Future<AuthResult> register(String username, String password) async {
   }
 
 
+  Future<void> logout() async {
+    // Clear user data from shared preferences or any other local storage
+    var prefs = await SharedPreferences.getInstance();
+    await prefs.remove('accessToken');
+    await prefs.remove('refreshToken');
+
+    // Perform any other cleanup tasks here, like invalidating tokens on the server if necessary
+
+    // Notify any listeners that the user has logged out
+    notifyListeners();
+  }
+
 }

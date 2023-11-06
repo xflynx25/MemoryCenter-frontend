@@ -6,6 +6,7 @@ import '../services/topic_service.dart';
 import '../services/collection_service.dart';
 import '../services/user_service.dart';
 import '../widgets/data_future_builder.dart';
+import '../widgets/custom_app_bar.dart';
 import '../utils/config.dart';
 import 'package:logging/logging.dart';
 
@@ -60,29 +61,17 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: FutureBuilder<User>(
-            future: futureUser,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                return Text('Profile (${snapshot.data!.username})');
-              }
-            },
-          ),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              // This is called when the user presses the AppBar back button
-              // Refresh the data here too
-              refreshData();
-              Navigator.of(context).pop();
-            },
-          ),
-        ),
+        appBar: CustomAppBar(
+      title: 'Profile',
+      showBackButton: true,
+      onBackButtonPressed: () {
+        refreshData();
+        Navigator.of(context).pop();
+      },
+      actions: [
+        // ... your other action widgets
+      ],
+    ),
         body: SingleChildScrollView(
           child: Column(
             children: <Widget>[
