@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'services/auth_service.dart';
+import 'pages/register_page.dart';
 import 'pages/login_page.dart';
 import 'pages/home_page.dart';
 import 'pages/profile_page.dart';
