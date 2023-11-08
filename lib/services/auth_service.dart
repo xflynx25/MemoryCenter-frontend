@@ -41,13 +41,13 @@ class AuthService with ChangeNotifier {
   }
 }
 
-Future<AuthResult> register(String username, String password) async {
+Future<AuthResult> register(String username, String password, String secretMessage) async {
   var url = Uri.parse('${Config.HOST}/api/register/');
   try {
     var response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
-      body: json.encode({'username': username, 'password': password}),
+      body: json.encode({'username': username, 'password': password, 'secret_message': secretMessage}), // Include the secret message
     );
 
     var data = json.decode(response.body);
@@ -63,6 +63,10 @@ Future<AuthResult> register(String username, String password) async {
     return AuthResult(false, errorMessage: e.toString());
   }
 }
+
+
+
+
   Future<List<Collection>> getCollections() async {
     var url = Uri.parse('${Config.HOST}/api/get_all_collections/');
     var prefs = await SharedPreferences.getInstance();
