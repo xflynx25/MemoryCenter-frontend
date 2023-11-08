@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../widgets/loading.dart';
+import '../state/state_service.dart';
 import 'package:logging/logging.dart';
+import '../models/user.dart';
+import '../services/user_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+
+
 
 final _logger = Logger('LoginPageLogging');
 
@@ -66,25 +73,42 @@ class _LoginFormState extends State<LoginForm> {
   String _username = '';
   String _password = '';
 
-  // Inside the _LoginFormState class
   Future<void> _submit(AuthService auth, Future<AuthResult> Function() action) async {
-    if (_formKey.currentState?.validate() ?? false) { // Make sure to check if the form is valid
+    if (_formKey.currentState?.validate() ?? false) {
       _formKey.currentState!.save();
       showDialog(
         context: context,
-        barrierDismissible: false, // Prevents dialog from closing on outside tap
+        barrierDismissible: false,
         builder: (context) => Loading(),
       );
 
-      AuthResult result = await action(); // Call the passed function, which should return a Future<AuthResult>
+      AuthResult result = await action();
       Navigator.pop(context); // Pop the loading dialog
 
       if (result.success) {
-        Navigator.pushReplacementNamed(context, '/home');
+        // Retrieve and save the user profile information after successful login
+        try {
+          User currentUser = await UserService().getUser(null); // Pass null to indicate current user
+          await saveUserToSharedPreferences(currentUser); // Save to SharedPreferences
+          Navigator.pushReplacementNamed(context, '/home');
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to load user profile: $e')),
+          );
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result.errorMessage)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result.errorMessage)),
+        );
       }
     }
+  }
+
+  // Helper method to save the user to SharedPreferences
+  Future<void> saveUserToSharedPreferences(User user) async {
+    final prefs = await SharedPreferences.getInstance();
+    final String userJson = jsonEncode(user.toJson());
+    await prefs.setString('user', userJson);
   }
 
 

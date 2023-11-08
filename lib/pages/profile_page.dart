@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/topic.dart';
 import '../models/collection.dart';
 import '../models/user.dart';
+import '../state/app_state.dart';
 import '../services/topic_service.dart';
 import '../services/collection_service.dart';
 import '../services/user_service.dart';
@@ -31,6 +32,10 @@ class _ProfilePageState extends State<ProfilePage> {
   
   final _collectionNameController = TextEditingController();
   final _collectionDescriptionController = TextEditingController();
+
+  late UserState _userState; // Add this line
+  bool _hasEditAccess = false;
+
   
   @override
   void dispose() {
@@ -51,10 +56,22 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void initState() {
-    _logger.info('PROFILEPAGEINIT');
     super.initState();
+    _userState = UserState(); // Initialize UserState
+    _initializeEditAccess();
     refreshData();
   }
+
+  void _initializeEditAccess() async {
+    await _userState.initUser(); // This will load the user from SharedPreferences
+    if (mounted) {
+      setState(() {
+        _hasEditAccess = _userState.currentUser?.id == widget.userId;
+      });
+    }
+  }
+
+
 
 
 

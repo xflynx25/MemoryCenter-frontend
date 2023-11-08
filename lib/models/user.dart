@@ -22,4 +22,14 @@ class User {
       awards: (json['awards'] as List).cast<String>(),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'username': username,
+      'realname': realname,
+      'description': description,
+      'awards': awards,
+    };
+  }
 }

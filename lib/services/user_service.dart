@@ -29,26 +29,27 @@ class UserService {
       throw Exception('Failed to load users');
     }
   }
+Future<User> getUser([int? userId]) async {
+  var endpoint = userId != null ? '/api/view_profile/$userId/' : '/api/view_profile/';
+  var url = Uri.parse('${Config.HOST}$endpoint');
+  var prefs = await SharedPreferences.getInstance();
+  var accessToken = prefs.getString('accessToken');
 
-  Future<User> getUser(int userId) async {
-    var url = Uri.parse('${Config.HOST}/api/view_profile/$userId/');
-    var prefs = await SharedPreferences.getInstance();
-    var accessToken = prefs.getString('accessToken');
+  var response = await http.get(
+    url,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer $accessToken",
+    },
+  );
 
-    var response = await http.get(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $accessToken",
-      },
-    );
-
-    if (response.statusCode == 200) {
-      var data = json.decode(response.body);
-      return User.fromJson(data);
-    } else {
-      throw Exception('Failed to load user profile');
-    }
+  if (response.statusCode == 200) {
+    var data = json.decode(response.body);
+    return User.fromJson(data);
+  } else {
+    throw Exception('Failed to load user profile');
   }
+}
+
 }
 
