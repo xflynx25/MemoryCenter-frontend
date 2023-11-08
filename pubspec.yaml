@@ -34,6 +34,7 @@ dependencies:
   logging: ^1.0.1
   provider: ^5.0.0
   shared_preferences: ^2.0.6
+  flutter_dotenv: ^5.0.2
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -67,6 +68,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/welcome_picture.jpg
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

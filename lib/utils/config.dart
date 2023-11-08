@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 class Config {
+  //static String get HOST => dotenv.env['HOST'] ?? 'http://127.0.0.1:8000'; // localhost if we don't provide host
   static const HOST = 'http://127.0.0.1:8000';
   static const MAX_ITEMS_IN_TOPIC = 10000;
   static const EDIT_TOPIC_0_BLANK_ITEMS = 10;

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import 'services/auth_service.dart';
 import 'pages/register_page.dart';
 import 'pages/login_page.dart';
@@ -18,7 +20,24 @@ import 'dart:developer' as developer;
 import 'package:logging/logging.dart';
 final _logger = Logger('MainLogging');
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensures plugin services are initialized.
+  
+  // Initialize logger, debug prints etc.
+  _initializeLogging();
+
+  // Load the .env file
+  await dotenv.load(fileName: ".env"); // Specify the .env file name
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => AuthService(),
+      child: MyApp(),
+    ),
+  );
+}
+
+void _initializeLogging() {
 
   // just many print methods for debugging in case some stop working
   developer.log('log me', name: 'my.app');
@@ -31,14 +50,9 @@ void main() {
   _logger.info('MAIN');
   _logger.warning('MAIN');
   _logger.severe('MAIN');
-
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => AuthService(),
-      child: MyApp(),
-    ),
-  );
 }
+
+
 
 class MyApp extends StatelessWidget {
   @override
