@@ -32,6 +32,15 @@ class HelpPage extends StatelessWidget {
             ),
             SizedBox(height: 16),
 
+            Text(
+              'Studying',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'To study, you press the play button. You can have it give you the front or the back, or a probability distribution by the slider. You are self scoring, so if you get it right, then swipe right, if you get it wrong, swipe left. Up or down to flip the card over. The database will advance you a level if correct, drop you down if wrong. If you want to move to the last level, you will need to get it right on multiple days in a row, without failure. One failure will set you back. Then you can "retire" the card -- but only for so long, it will drop out after a while.',
+            ),
+            SizedBox(height: 16),
 
             Text(
               'Future Features to Look Out For',

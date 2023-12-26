@@ -49,10 +49,16 @@ class _EditTopicPage1State extends State<EditTopicPage1> {
     var backItems = _backController.text.split(_selectedDelimiter);
 
     if (frontItems.length != backItems.length) {
-      // Items count mismatch, cannot proceed
+      // Items count mismatch, show SnackBar with details
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Mismatch in item count: ${frontItems.length} fronts, ${backItems.length} backs'),
+          backgroundColor: Colors.red,
+        ),
+      );
       setState(() {
         _isSubmitting = false;
-        _showError = true;
+        _showError = true; // You can also use this flag to show/hide error icons or messages
       });
       return;
     }

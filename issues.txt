@@ -1,0 +1,2 @@
+1. trailing delimiters produce an extra blank card
+2. heroku seems to be going down on big inputs, or just arabic general, even though locally it is fine
