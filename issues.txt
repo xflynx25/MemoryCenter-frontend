@@ -1,5 +1,7 @@
 1. trailing delimiters produce an extra blank card
     .. let me solve this on the backend 
 2. heroku seems to be going down on big inputs, only 30 chars or less for front / back 
+    .. 30 chars for title topic/collection (both local and heroku)
+    .. 30 chars for front/back (only on heroku, seemingly no limit local)
 3. we fetch everything when we hit the profile, would be better to just load the items when they try to extend
 4. people can send unlimited stuff, we should be limiting them
