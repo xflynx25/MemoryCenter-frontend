@@ -9,6 +9,11 @@ import '../widgets/data_future_builder.dart';
 import '../widgets/custom_app_bar.dart';
 import '../utils/config.dart';
 import 'package:logging/logging.dart';
+import '../services/auth_service.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+
 
 final _logger = Logger('PROFILEPAGE_Logging');
 
@@ -36,7 +41,25 @@ class _ProfilePageState extends State<ProfilePage> {
   String _selectedVisibility = 'private'; // default value
   String _selectedTopicVisibility = 'private'; // default value for topic visibility
 
+  int? _loggedInUserId; // State variable for logged-in user ID
 
+  Future<int?> get loggedInUserId async {
+    var prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('loggedInUserId');
+  }
+
+  void _fetchLoggedInUserId() async {
+    _loggedInUserId = await loggedInUserId;
+    setState(() {}); // Update the state to reflect changes
+  }
+
+  @override
+  void initState() {
+    _logger.info('PROFILEPAGEINIT');
+    super.initState();
+    _fetchLoggedInUserId();
+    refreshData();
+  }
 
   
   @override
@@ -56,12 +79,8 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  @override
-  void initState() {
-    _logger.info('PROFILEPAGEINIT');
-    super.initState();
-    refreshData();
-  }
+
+
   
 
   void _showAddDialog({
@@ -156,10 +175,24 @@ void _showAddTopicDialog() {
   );
 }
 
-
-
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<int?>(
+      future: loggedInUserId, // This is your async operation
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator()); // Show loading indicator while data is loading
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}')); // Handle errors
+        } else {
+          _loggedInUserId = snapshot.data; // Update the state variable with the fetched user ID
+          return _buildPageContent(); // Build the page content using the fetched data
+        }
+      },
+    );
+  }
+
+Widget _buildPageContent() {
     return Scaffold(
         appBar: CustomAppBar(
       title: 'Profile',
@@ -235,10 +268,13 @@ void _showAddTopicDialog() {
                   padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.05),
                   child: Text('Collections', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                 ),
-                IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: _showAddCollectionDialog,
-                ),
+
+                (_loggedInUserId != null && widget.userId == _loggedInUserId) ? 
+                  IconButton(
+                    icon: Icon(Icons.add),
+                    onPressed: _showAddCollectionDialog,
+                  ) 
+                : Container(),
 
                 Spacer(),
               ],
@@ -289,7 +325,7 @@ void _showAddTopicDialog() {
                                     ],
                                   ),
                                 ),
-                                (collections[index].visibility == 'private' || collections[index].visibility == 'global_edit')
+                                (_loggedInUserId != null && (collections[index].user == _loggedInUserId || collections[index].visibility == 'global_edit'))
                                 ? Row(
                                     children: <Widget>[
                                       IconButton(
@@ -381,10 +417,15 @@ void _showAddTopicDialog() {
                   ),
                   Spacer(),
                   Text('Topics', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+
+
+                 (_loggedInUserId != null && widget.userId == _loggedInUserId) ? 
                   IconButton(
                     icon: Icon(Icons.add),
                     onPressed: _showAddTopicDialog,
-                  ),
+                  )
+                  : Container(),
+
                   Spacer(),
                 ],
               ),
@@ -436,7 +477,8 @@ void _showAddTopicDialog() {
                                   ),
                                 ),
 
-                              (topics[index].visibility == 'private' || topics[index].visibility == 'global_edit')
+
+                              (_loggedInUserId != null && (topics[index].user == _loggedInUserId || topics[index].visibility == 'global_edit'))
                               ? Row(
                                   children: <Widget>[
                                     IconButton(

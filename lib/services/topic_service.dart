@@ -23,22 +23,22 @@ class TopicService {
         },
       );
 
+      _logger.warning('Response status code: ${response.statusCode}');
+      _logger.warning('Response body: ${response.body}');
+
       if (response.statusCode == 200) {
-        _logger.info('response _alltopics: ');
-        _logger.info(response.body); // Add this line
-        _logger.info(response.headers['content-type']); // Add this line
-          var data = json.decode(response.body);
-          List<Topic> topics = [];
-          for (var topic in data) {
-            topics.add(Topic.fromJson(topic));
-          }
-          return topics;
+        var data = json.decode(response.body);
+        List<Topic> topics = [];
+        for (var topic in data) {
+          topics.add(Topic.fromJson(topic));
+        }
+        return topics;
       } else {
+        _logger.warning('Failed to load topics, status code: ${response.statusCode}');
         throw Exception('Failed to load topics');
       }
     } catch (e) {
-      // Handle any exceptions that occur during the request
-      _logger.severe('Failed to get all topics', e);
+      _logger.severe('Exception in getAllTopics', e);
       throw Exception('Failed to load topics');
     }
   }

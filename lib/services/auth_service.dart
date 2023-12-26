@@ -15,6 +15,7 @@ class AuthResult {
 
 
 class AuthService with ChangeNotifier {
+
   Future<AuthResult> login(String username, String password) async {
   var url = Uri.parse('${Config.HOST}/api/login/');
   try {
@@ -29,6 +30,8 @@ class AuthService with ChangeNotifier {
       var prefs = await SharedPreferences.getInstance();
       prefs.setString('accessToken', data['access']);
       prefs.setString('refreshToken', data['refresh']);
+      prefs.setInt('loggedInUserId', data['user_id']); // Assuming user_id is an integer
+
       return AuthResult(true);
     } else {
       // Handle the error message from the response if any
@@ -52,6 +55,11 @@ Future<AuthResult> register(String username, String password, String secretMessa
 
     var data = json.decode(response.body);
     if (response.statusCode == 201 && data['status'] == 'success') {
+      
+      var prefs = await SharedPreferences.getInstance();
+      prefs.setString('accessToken', data['access']);
+      prefs.setString('refreshToken', data['refresh']);
+      prefs.setInt('loggedInUserId', data['user_id']); // Assuming user_id is an integer
       return AuthResult(true);
     } else {
       // Handle the error message from the response if any
@@ -94,6 +102,7 @@ Future<AuthResult> register(String username, String password, String secretMessa
     var prefs = await SharedPreferences.getInstance();
     await prefs.remove('accessToken');
     await prefs.remove('refreshToken');
+    await prefs.remove('loggedInUserId'); // Clear the user ID
 
     // Perform any other cleanup tasks here, like invalidating tokens on the server if necessary
 
