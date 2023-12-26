@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:firebase_core/firebase_core.dart';
+
 
 import 'services/auth_service.dart';
 import 'pages/register_page.dart';
@@ -22,6 +24,19 @@ final _logger = Logger('MainLogging');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensures plugin services are initialized.
+
+  // FIREBASE TOOLS
+  await Firebase.initializeApp(
+    options: FirebaseOptions(
+      apiKey: "AIzaSyCoiiGnhtU22eMB8Hvi3KRlmJTKi-35rT4",
+      authDomain: "memorycenter00.firebaseapp.com",
+      projectId: "memorycenter00",
+      storageBucket: "memorycenter00.appspot.com",
+      messagingSenderId: "404428894029",
+      appId: "1:404428894029:web:cc9a80d13a8517565c9104",
+      measurementId: "G-8TDYK940L9"
+    ),
+  );
   
   // Initialize logger, debug prints etc.
   _initializeLogging();

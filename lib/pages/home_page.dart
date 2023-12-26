@@ -77,7 +77,7 @@ class _HomePageState extends State<HomePage> {
                       }
                     },
                   ),
-                ),
+                ), 
               ),
             ),
 
@@ -87,7 +87,7 @@ class _HomePageState extends State<HomePage> {
                 height: MediaQuery.of(context).size.width * 0.25, // 50% of screen width
                 width: MediaQuery.of(context).size.width * 0.25, // 50% of screen width
                 child: Image.asset(
-                  'assets/welcome_picture.jpg',
+                  'assets/images/welcome_picture.jpg',
                   fit: BoxFit.cover,
                 ),
               ),
