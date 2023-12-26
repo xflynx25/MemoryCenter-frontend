@@ -8,6 +8,7 @@ import 'services/auth_service.dart';
 import 'pages/register_page.dart';
 import 'pages/login_page.dart';
 import 'pages/home_page.dart';
+import 'pages/help_page.dart';
 import 'pages/profile_page.dart';
 import 'pages/edit_collection_page.dart';
 import 'pages/edit_topic_page0.dart';
@@ -89,7 +90,9 @@ class MyApp extends StatelessWidget {
                   ));
         } else if (settings.name == '/home') {
           return MaterialPageRoute(builder: (context) => HomePage());
-        } else if (settings.name == '/profile') {
+        } else if (settings.name == '/help') {
+            return MaterialPageRoute(builder: (context) => HelpPage());
+          }else if (settings.name == '/profile') {
           final int userId = settings.arguments as int;
           return MaterialPageRoute(builder: (context) => ProfilePage(userId: userId));
         } else if (settings.name == '/edit_topic0') {

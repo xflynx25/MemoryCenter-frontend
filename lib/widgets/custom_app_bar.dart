@@ -30,8 +30,19 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             )
           : null,
       actions: <Widget>[
-        // Check if actions is not null before spreading it
+        // Existing actions
         if (actions != null) ...actions!,
+
+        // Help button
+        IconButton(
+          icon: Icon(Icons.help_outline),
+          onPressed: () {
+            // Navigate to the Help page or show a dialog with help information
+            Navigator.of(context).pushNamed('/help');
+          },
+        ),
+
+        // Logout button
         IconButton(
           icon: Icon(Icons.logout),
           onPressed: () async {
