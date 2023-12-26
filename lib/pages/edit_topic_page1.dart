@@ -24,6 +24,10 @@ class _EditTopicPage1State extends State<EditTopicPage1> {
   var _showSuccess = false;
   var _showError = false;
 
+  List<String> _delimiters = ['.', ';', ',']; // Add more delimiters as needed
+  String _selectedDelimiter = '.'; // Default delimiter
+
+
   @override
   void initState() {
     super.initState();
@@ -41,8 +45,8 @@ class _EditTopicPage1State extends State<EditTopicPage1> {
     var prefs = await SharedPreferences.getInstance();
     var accessToken = prefs.getString('accessToken') ?? '';
 
-    var frontItems = _frontController.text.split('.');
-    var backItems = _backController.text.split('.');
+    var frontItems = _frontController.text.split(_selectedDelimiter);
+    var backItems = _backController.text.split(_selectedDelimiter);
 
     if (frontItems.length != backItems.length) {
       // Items count mismatch, cannot proceed
@@ -89,37 +93,62 @@ class _EditTopicPage1State extends State<EditTopicPage1> {
       topic: widget.topic,
       child: Padding(
         padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            TextField(
-              controller: _frontController,
-              maxLines: null,
-              decoration: InputDecoration(
-                hintText: "Enter fronts here, separated by periods"
+          child: SingleChildScrollView( // Wrap with SingleChildScrollView
+          child: Column(
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text('Delimiter: ', style: TextStyle(fontSize: 16)), // Label for the dropdown
+                  DropdownButton<String>(
+                    value: _selectedDelimiter,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedDelimiter = newValue!;
+                      });
+                    },
+                    items: _delimiters.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value, style: TextStyle(fontSize: 16)), // Larger font size
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              controller: _backController,
-              maxLines: null,
-              decoration: InputDecoration(
-                hintText: "Enter backs here, separated by periods"
-              ),
-            ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              child: const Text('Submit changes', style: TextStyle(color: Colors.white)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(80),
+
+              TextField(
+                controller: _frontController,
+                maxLines: null,
+                decoration: InputDecoration(
+                  hintText: "Enter fronts here, separated by ${_selectedDelimiter == '.' ? 'periods' : _selectedDelimiter}"
                 ),
+
               ),
-              onPressed: _isSubmitting ? null : submitChanges,
-            ),
-            if (_showSuccess) Icon(Icons.check_circle, color: Colors.green),
-            if (_showError) Icon(Icons.error, color: Colors.red),
-          ],
+              SizedBox(height: 16),
+              TextField(
+                controller: _backController,
+                maxLines: null,
+                decoration: InputDecoration(
+                  hintText: "Enter fronts here, separated by ${_selectedDelimiter == '.' ? 'periods' : _selectedDelimiter}"
+                ),
+
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                child: const Text('Submit changes', style: TextStyle(color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(80),
+                  ),
+                ),
+                onPressed: _isSubmitting ? null : submitChanges,
+              ),
+              if (_showSuccess) Icon(Icons.check_circle, color: Colors.green),
+              if (_showError) Icon(Icons.error, color: Colors.red),
+            ],
+          ),
         ),
       ),
     );
