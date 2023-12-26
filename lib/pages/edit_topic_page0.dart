@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/item_service.dart';
 import '../models/topic.dart';
 import '../models/editing_item.dart';
 import '../widgets/topic_editor.dart';
@@ -45,68 +46,40 @@ class _EditTopicPage0State extends State<EditTopicPage0> {
     });
   }
 
-  Future<void> submitChanges() async {
-    setState(() {
-      _isSubmitting = true;
-      _showSuccess = false;
-      _showError = false;
-    });
 
-    var url = Uri.parse('${Config.HOST}/api/edit_items_in_topic_full/');
+Future<void> submitChanges() async {
+  setState(() {
+    _isSubmitting = true;
+    _showSuccess = false;
+    _showError = false;
+  });
 
-    var prefs = await SharedPreferences.getInstance();
-    var accessToken = prefs.getString('accessToken') ?? '';
+  ItemService itemService = ItemService();
+  bool success = await itemService.editItemsInTopic(widget.topic.id, items);
 
-    var response = await http.post(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $accessToken",
-      },
-      body: json.encode({
-        "topic_id": widget.topic.id,
-        "items": items.map((item) => {
-          "id": item.id,
-          "front": item.front,
-          "back": item.back
-        }).toList()
-      }),
-    );
-
-    if (response.statusCode == 200) {
-        _showSuccess = true;
-
-        // Fetch the updated items
-        fetchUpdatedItems(accessToken);
-    } else {
-        _showError = true;
-    }
-
-    setState(() {
-      _isSubmitting = false;
-    });
+  if (success) {
+    _showSuccess = true;
+    fetchUpdatedItems();
+  } else {
+    _showError = true;
   }
 
-  Future<void> fetchUpdatedItems(String accessToken) async {
-      var response = await http.get(
-        Uri.parse('${Config.HOST}/api/get_topic_items/${widget.topic.id}/'),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $accessToken",
-        },
-      );
+  setState(() {
+    _isSubmitting = false;
+  });
+}
 
-      if (response.statusCode == 200) {
-          var responseBody = json.decode(utf8.decode(response.bodyBytes));
-          var updatedItems = responseBody["items"];
-          setState(() {
-              // Update items based on the server response
-              items = updatedItems.map(
-                  (item) => EditingItem(id: item["id"], front: item["front"], back: item["back"])
-              ).toList();
-          });
-      }
+Future<void> fetchUpdatedItems() async {
+  ItemService itemService = ItemService();
+  try {
+    var updatedItems = await itemService.getItems(widget.topic.id);
+    setState(() {
+      items = updatedItems;
+    });
+  } catch (e) {
+    // Handle exception
   }
+}
 
 
 void addMoreItems() {

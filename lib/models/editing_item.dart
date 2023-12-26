@@ -8,4 +8,12 @@ class EditingItem {
     required this.front,
     required this.back,
   });
+
+  factory EditingItem.fromJson(Map<String, dynamic> json) {
+    return EditingItem(
+      id: json['id'],
+      front: json['front'],
+      back: json['back'],
+    );
+  }
 }

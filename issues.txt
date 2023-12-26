@@ -1,2 +1,5 @@
 1. trailing delimiters produce an extra blank card
-2. heroku seems to be going down on big inputs, or just arabic general, even though locally it is fine
+    .. let me solve this on the backend 
+2. heroku seems to be going down on big inputs, only 30 chars or less for front / back 
+3. we fetch everything when we hit the profile, would be better to just load the items when they try to extend
+4. people can send unlimited stuff, we should be limiting them

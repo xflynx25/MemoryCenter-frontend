@@ -5,6 +5,8 @@ import '../models/topic.dart';
 import '../utils/config.dart';
 import '../widgets/topic_editor.dart';
 import 'dart:convert';
+import '../services/item_service.dart';
+
 
 
 class EditTopicPage2 extends StatefulWidget {
@@ -28,61 +30,46 @@ class _EditTopicPage2State extends State<EditTopicPage2> {
   }
 
   Future<void> submitChanges() async {
-    setState(() {
-      _isSubmitting = true;
-      _showSuccess = false;
-      _showError = false;
-    });
+      setState(() {
+        _isSubmitting = true;
+        _showSuccess = false;
+        _showError = false;
+      });
 
-    var url = Uri.parse('${Config.HOST}/api/add_items_to_topic/');
+      var lines = _dataController.text.split('\n');
+      var items = <List<String>>[];
 
-    var prefs = await SharedPreferences.getInstance();
-    var accessToken = prefs.getString('accessToken') ?? '';
-
-    var lines = _dataController.text.split('\n');
-    var items = <List<String>>[];
-
-    for (var line in lines) {
-      var parts = line.split(',');
-      if (parts.length != 2) {
-        // Invalid format, show SnackBar
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Invalid format in line: $line'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        setState(() {
-          _isSubmitting = false;
-          _showError = true;
-        });
-        return;
+      for (var line in lines) {
+        var parts = line.split(',');
+        if (parts.length != 2 || parts[0].trim().isEmpty || parts[1].trim().isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Invalid or empty format in line: $line'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          setState(() {
+            _isSubmitting = false;
+            _showError = true;
+          });
+          return;
+        }
+        items.add([parts[0].trim(), parts[1].trim()]);
       }
-      items.add([parts[0].trim(), parts[1].trim()]);
+
+      ItemService itemService = ItemService();
+      bool success = await itemService.addItemsToTopic(widget.topic.id, items);
+
+      if (success) {
+        _showSuccess = true;
+      } else {
+        _showError = true;
+      }
+
+      setState(() {
+        _isSubmitting = false;
+      });
     }
-
-    var response = await http.post(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $accessToken",
-      },
-      body: json.encode({
-        "topic_id": widget.topic.id,
-        "items": items,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      _showSuccess = true;
-    } else {
-      _showError = true;
-    }
-
-    setState(() {
-      _isSubmitting = false;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
