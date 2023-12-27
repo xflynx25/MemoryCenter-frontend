@@ -147,6 +147,9 @@ void changeCard(int change) {
   }
 
   Future<void> _fetchCardItems() async {
+    // Ensure scores are updated before fetching new card items to minimize repeats
+    await _updateScores();
+
     _logger.info('Fetching card items for collection ${widget.collection.id}');
     try {
       List<CardItem> fetchedCardItems = await CollectionService().fetchNFromCollection(widget.collection.id, Config.FETCH_NUMBER);

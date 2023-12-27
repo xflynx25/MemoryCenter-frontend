@@ -5,9 +5,9 @@ class Config {
   static const HOST = 'https://memory-center-backend-0c697b5afd37.herokuapp.com';
   static const MAX_ITEMS_IN_TOPIC = 10000;
   static const EDIT_TOPIC_0_BLANK_ITEMS = 10;
-  static const FETCH_NUMBER = 15;
-  static const FETCH_INTERVAL = 15; //seconds
-  static const FETCH_AT_HOW_MANY_LEFT = 1; //seconds
+  static const FETCH_NUMBER = 20; // how many to fetch at a time
+  static const FETCH_INTERVAL = 10; // bad name, it is how many seconds you send the scores  
+  static const FETCH_AT_HOW_MANY_LEFT = 0; // how many left when you fetch new ones (you will get repeats of whatever you just studied and score hasn't been updated) tradeoff of loading screen vs repeats
   
   // static instead of const
   static final List<Color> SCORE_COLORS = [
