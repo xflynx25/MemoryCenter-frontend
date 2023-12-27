@@ -229,6 +229,42 @@ void _showAddTopicDialog() {
   );
 }
 
+// Add this function in your _ProfilePageState class
+void _showTopicInfoDialog(Topic topic) {
+  int totalItems = topic.items.length;
+  Map<int, int> scoreCounts = {};
+  for (var item in topic.items) {
+    scoreCounts[item.score] = (scoreCounts[item.score] ?? 0) + 1;
+  }
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Topic Info'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: <Widget>[
+              Text('Name: ${topic.topicName}'),
+              Text('Description: ${topic.description}'),
+              Text('Total Items: $totalItems'),
+              ...scoreCounts.entries.map((entry) => Text('Score ${entry.key}: ${entry.value}')),
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Close'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<int?>(
@@ -535,6 +571,7 @@ Widget _buildPageContent() {
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: topics.length,
                   itemBuilder: (context, index) {
+                      Topic topic = topics[index];  // for use in the info section
                     return Center(
                       child: Container(
                         width: MediaQuery.of(context).size.width * 0.6, // Adjust to fit the IconButton
@@ -548,6 +585,12 @@ Widget _buildPageContent() {
                             ),
                             child: Row(
                               children: <Widget>[
+
+                                IconButton(
+                                  icon: Icon(Icons.info_outline),
+                                  onPressed: () => _showTopicInfoDialog(topic),
+                                ),
+                                
                                 Expanded(
                                   child: ExpansionTile(
                                     title: Text(topics[index].topicName),

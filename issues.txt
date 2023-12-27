@@ -11,3 +11,4 @@
 8. when you go out of studying, need to return to the main page to get the updated scores. should automatically refresh
 9. when you submit but with some malformatted ones in item submission style 0, you will get weird artifact until you go out and come back in
 10. the ui is so busy. When you have many items topics and coollections, just having one column is a lot. Possibly, we can have two columns, one to show the collections and topics, and then you can click to focus on one, and that goes in the focus region in the other colummn. 
+11. some absurdly long files (profile page), these could be moved into folder and have the subcomponents contracted out to different files
