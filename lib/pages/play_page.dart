@@ -150,16 +150,29 @@ void changeCard(int change) {
     // Ensure scores are updated before fetching new card items to minimize repeats
     await _updateScores();
 
+    // Determine the number of cards to remove from the fetched items, and remove, to avoid duplication
+    // should work unless we get in an update scores before the fetch N, in which case all that will happen is we will throw away things we could have studied, that's ok
+    int numCardsToRemove = cardItems.length;
+
     _logger.info('Fetching card items for collection ${widget.collection.id}');
-    try {
+      try {
       List<CardItem> fetchedCardItems = await CollectionService().fetchNFromCollection(widget.collection.id, Config.FETCH_NUMBER);
+
+      // remove the duplicate
+      if (numCardsToRemove > 0 && fetchedCardItems.isNotEmpty) {
+        fetchedCardItems = fetchedCardItems.sublist(numCardsToRemove);
+      }
+
       if (fetchedCardItems.isEmpty && cardItems.isEmpty) {
         setState(() {
           errorMessage = 'No card items found for this collection.';
         });
       } else {
+        // Shuffle the fetched card items before appending
+        fetchedCardItems.shuffle(random); // Use the existing random object for shuffling
+
         setState(() {
-          cardItems.addAll(fetchedCardItems); // Append new items to existing ones
+          cardItems.addAll(fetchedCardItems); // Append shuffled new items to existing ones
         });
       }
       _logger.info('Fetched card items: $fetchedCardItems');

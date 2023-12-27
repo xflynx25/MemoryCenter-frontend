@@ -1,7 +1,8 @@
 1. trailing delimiters produce an extra blank card
     .. let me solve this on the backend 
 2. heroku seems to be going down on big inputs, only 30 chars or less for front / back 
-    .. 30 chars for title topic/collection (both local and heroku)
-    .. 30 chars for front/back (only on heroku, seemingly no limit local)
+    SOLVED
 3. we fetch everything when we hit the profile, would be better to just load the items when they try to extend
 4. people can send unlimited stuff, we should be limiting them
+5. the last item problem, what we could do is to not take the first N items, when we are fetching with N left, therefore we won't repeat. 
+5.5 additionally, doesn't seem like we randomize the order once we pull in, which results in this determinism which is unpleasant. 
