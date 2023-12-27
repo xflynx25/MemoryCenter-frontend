@@ -15,6 +15,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 
+enum SortingMethod {
+  defaultOrder,
+  scoreAscending,
+  scoreDescending,
+  alphabetical
+}
+
 
 final _logger = Logger('PROFILEPAGE_Logging');
 
@@ -43,6 +50,9 @@ class _ProfilePageState extends State<ProfilePage> {
   String _selectedTopicVisibility = 'private'; // default value for topic visibility
 
   int? _loggedInUserId; // State variable for logged-in user ID
+  
+  SortingMethod _currentSortingMethod = SortingMethod.defaultOrder;
+
 
   Future<int?> get loggedInUserId async {
     var prefs = await SharedPreferences.getInstance();
@@ -80,7 +90,31 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-
+  Future<List<Topic>> _fetchSortedTopics() async {
+      var topics = await TopicService().getAllTopics(widget.userId);
+      switch (_currentSortingMethod) {
+        case SortingMethod.scoreAscending:
+          for (var topic in topics) {
+            topic.items.sort((a, b) => a.score.compareTo(b.score));
+          }
+          break;
+        case SortingMethod.scoreDescending:
+          for (var topic in topics) {
+            topic.items.sort((a, b) => b.score.compareTo(a.score));
+          }
+          break;
+        case SortingMethod.alphabetical:
+          for (var topic in topics) {
+            topic.items.sort((a, b) => a.front.compareTo(b.front));
+          }
+          break;
+        case SortingMethod.defaultOrder:
+        default:
+          // No sorting needed, return as is
+          break;
+      }
+      return topics;
+    }
 
   
 
@@ -159,6 +193,20 @@ class _ProfilePageState extends State<ProfilePage> {
       );
     },
   );
+}
+
+String _formatSortingMethodName(SortingMethod method) {
+  // Function to format the name of the sorting method for display in the dropdown
+  switch (method) {
+    case SortingMethod.scoreAscending:
+      return 'Score Ascending';
+    case SortingMethod.scoreDescending:
+      return 'Score Descending';
+    case SortingMethod.alphabetical:
+      return 'Alphabetical';
+    default:
+      return 'Default';
+  }
 }
 
 void _showAddCollectionDialog() {
@@ -260,8 +308,11 @@ Widget _buildPageContent() {
                       ],
                     ),
                   ),
+
                 ],
               ),
+
+
 
             Row(
               children: <Widget>[
@@ -270,10 +321,7 @@ Widget _buildPageContent() {
                   onPressed: () {},
                 ),
                 Spacer(),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.05),
-                  child: Text('Collections', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                ),
+                Text('Collections', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
 
                 (_loggedInUserId != null && widget.userId == _loggedInUserId) ? 
                   IconButton(
@@ -285,6 +333,8 @@ Widget _buildPageContent() {
                 Spacer(),
               ],
             ),
+
+
 
             DataFutureBuilder<Collection>(
               future: futureCollections,
@@ -436,9 +486,48 @@ Widget _buildPageContent() {
                 ],
               ),
 
+
+
+            // New Row for the Sorting Dropdown
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8.0),
+                  color: Colors.white, // Optional: Change the background color
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text('Sort Items in Topics By: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                    DropdownButton<SortingMethod>(
+                      value: _currentSortingMethod,
+                      underline: Container(), // Removes underline of DropdownButton
+                      onChanged: (SortingMethod? newValue) {
+                        setState(() {
+                          _currentSortingMethod = newValue ?? SortingMethod.defaultOrder;
+                          futureTopics = _fetchSortedTopics(); // Refresh sorted topics
+                        });
+                      },
+                      items: SortingMethod.values.map((SortingMethod method) {
+                        return DropdownMenuItem<SortingMethod>(
+                          value: method,
+                          child: Text(_formatSortingMethodName(method)),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+
             
             DataFutureBuilder<Topic>(
-              future: futureTopics,
+              future: _fetchSortedTopics(),
               dataBuilder: (BuildContext context, List<Topic> topics) {
                 _logger.warning('IN ITEMBUILDER OF TOPICS');
                 return ListView.builder(

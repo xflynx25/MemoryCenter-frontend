@@ -5,8 +5,9 @@
 5. (SOLVED) the last item problem, what we could do is to not take the first N items, when we are fetching with N left, therefore we won't repeat. 
 5.5 (SOLVED) additionally, doesn't seem like we randomize the order once we pull in, which results in this determinism which is unpleasant. 
 6. would be nice to have some sort of a marker on the collection of your vocab size or how well you are doing
-    6.1 also to rank them on the dropdown, in order of the score
-        6.1.a and to allow to reverse
+    6.1 (SOLVED) also to rank them on the dropdown, in order of the score
+        6.1.a (SOLVED) and to allow to reverse
 7. need to be able to change the name of topics and collecitons (maybe the cascade saves us here)
 8. when you go out of studying, need to return to the main page to get the updated scores. should automatically refresh
 9. when you submit but with some malformatted ones in item submission style 0, you will get weird artifact until you go out and come back in
+10. the ui is so busy. When you have many items topics and coollections, just having one column is a lot. Possibly, we can have two columns, one to show the collections and topics, and then you can click to focus on one, and that goes in the focus region in the other colummn. 
