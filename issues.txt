@@ -4,7 +4,7 @@
 4. (SOLVED) people can send unlimited stuff, we should be limiting them
 5. (SOLVED) the last item problem, what we could do is to not take the first N items, when we are fetching with N left, therefore we won't repeat. 
 5.5 (SOLVED) additionally, doesn't seem like we randomize the order once we pull in, which results in this determinism which is unpleasant. 
-6. would be nice to have some sort of a marker on the collection of your vocab size or how well you are doing
+6. (SOLVED -- but will make it harder to modularize the fetching of items) would be nice to have some sort of a marker on the collection of your vocab size or how well you are doing
     6.1 (SOLVED) also to rank them on the dropdown, in order of the score
         6.1.a (SOLVED) and to allow to reverse
 7. need to be able to change the name of topics and collecitons (maybe the cascade saves us here)

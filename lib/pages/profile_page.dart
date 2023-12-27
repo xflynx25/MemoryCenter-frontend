@@ -13,6 +13,8 @@ import '../services/auth_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import '../widgets/score_distribution_bar.dart';  // Adjust the import based on your project structure
+
 
 
 enum SortingMethod {
@@ -560,123 +562,122 @@ Widget _buildPageContent() {
               ),
             ),
 
+DataFutureBuilder<Topic>(
+  future: _fetchSortedTopics(),
+  dataBuilder: (BuildContext context, List<Topic> topics) {
+    _logger.warning('IN ITEMBUILDER OF TOPICS');
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: topics.length,
+      itemBuilder: (context, index) {
+        Topic topic = topics[index]; // for use in the info section
+        Map<int, double> distribution = calculateScoreDistribution(topic); // for coloring books
 
-            
-            DataFutureBuilder<Topic>(
-              future: _fetchSortedTopics(),
-              dataBuilder: (BuildContext context, List<Topic> topics) {
-                _logger.warning('IN ITEMBUILDER OF TOPICS');
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: topics.length,
-                  itemBuilder: (context, index) {
-                      Topic topic = topics[index];  // for use in the info section
-                    return Center(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 0.6, // Adjust to fit the IconButton
-                        child: Card(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Colors.grey,
-                                width: 1,
+        // Add margin here
+        return Container(
+          margin: EdgeInsets.symmetric(vertical: 6.0), // Adjust the value as needed
+          child: Center(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.6, // Adjust to fit the IconButton
+            child: Card(
+              child: Column(
+                children: [
+                  ScoreDistributionBar(distribution: distribution),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey, width: 1),
+                    ),
+                    child: Row(
+                      children: <Widget>[
+                        IconButton(
+                          icon: Icon(Icons.info_outline),
+                          onPressed: () => _showTopicInfoDialog(topic),
+                        ),
+                        Expanded(
+                          child: ExpansionTile(
+                            title: Text(topics[index].topicName),
+                            children: <Widget>[
+                              ListView.builder(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                itemCount: topics[index].items.length,
+                                itemBuilder: (BuildContext context, int innerIndex) {
+                                  return ListTile(
+                                    tileColor: Config.SCORE_COLORS[topics[index].items[innerIndex].score],
+                                    title: Text(topics[index].items[innerIndex].front),
+                                    subtitle: Text(topics[index].items[innerIndex].back),
+                                  );
+                                },
                               ),
-                            ),
-                            child: Row(
-                              children: <Widget>[
-
-                                IconButton(
-                                  icon: Icon(Icons.info_outline),
-                                  onPressed: () => _showTopicInfoDialog(topic),
-                                ),
-                                
-                                Expanded(
-                                  child: ExpansionTile(
-                                    title: Text(topics[index].topicName),
-                                    children: <Widget>[
-                                      ListView.builder(
-                                        shrinkWrap: true,
-                                        physics: NeverScrollableScrollPhysics(),
-                                        itemCount: topics[index].items.length,
-                                        itemBuilder: (BuildContext context, int innerIndex) {
-                                          return ListTile(
-                                            tileColor: Config.SCORE_COLORS[topics[index].items[innerIndex].score],
-                                            title: Text(topics[index].items[innerIndex].front),
-                                            subtitle: Text(topics[index].items[innerIndex].back),
-                                            onTap: () {
-                                              // Implementation when an item is tapped
-                                            },
-                                          );
-                                        },
-
-                                      ),
-                                    ],
-                                  ),
-                                ),
-
-
-                              (_loggedInUserId != null && (topics[index].user == _loggedInUserId || topics[index].visibility == 'global_edit'))
-                              ? Row(
-                                  children: <Widget>[
-                                    IconButton(
-                                      icon: Icon(Icons.edit),
-                                      onPressed: () async {
-                                          await Navigator.pushNamed(context, '/edit_topic0', arguments: topics[index]);
-                                          refreshData();
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: Icon(Icons.delete),
-                                      onPressed: () async {
-                                        final confirm = await showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: const Text('Confirm'),
-                                              content: const Text('Are you sure you want to delete this topic?'),
-                                              actions: <Widget>[
-                                                TextButton(
-                                                  onPressed: () => Navigator.of(context).pop(true),
-                                                  child: const Text('DELETE'),
-                                                ),
-                                                TextButton(
-                                                  onPressed: () => Navigator.of(context).pop(false),
-                                                  child: const Text('CANCEL'),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-
-                                        if (confirm) {
-                                          final success = await TopicService().deleteTopic(topics[index].id);
-                                          if (success) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text('Topic deleted successfully')),
-                                            );
-                                          } else {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text('Failed to delete topic')),
-                                            );
-                                          }
-                                          refreshData();
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                )
-                              : Container(),
                             ],
                           ),
-                          ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              },
+                        if (_loggedInUserId != null && (topics[index].user == _loggedInUserId || topics[index].visibility == 'global_edit'))
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              IconButton(
+                                icon: Icon(Icons.edit),
+                                onPressed: () async {
+                                  await Navigator.pushNamed(context, '/edit_topic0', arguments: topics[index]);
+                                  refreshData();
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete),
+                                onPressed: () async {
+                                  final confirm = await showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text('Confirm'),
+                                        content: const Text('Are you sure you want to delete this topic?'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(true),
+                                            child: const Text('DELETE'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(false),
+                                            child: const Text('CANCEL'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                  if (confirm) {
+                                    final success = await TopicService().deleteTopic(topics[index].id);
+                                    if (success) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Topic deleted successfully')),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Failed to delete topic')),
+                                      );
+                                    }
+                                    refreshData();
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
+          ),
+          ),
+        );
+      },
+    );
+  },
+),
+
+
 
 
           ],
