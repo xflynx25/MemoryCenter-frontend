@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/config.dart';
 import '../models/topic.dart';
 import '../models/item.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:logging/logging.dart';
 final _logger = Logger('TopicLogging');
@@ -72,7 +73,7 @@ class TopicService {
     }
   }
 
-  Future<bool> createTopic(String topicName, String description, String visibility) async {
+  Future<http.Response> createTopic(String topicName, String description, String visibility) async {
     var url = Uri.parse('${Config.HOST}/api/create_topic/');
 
     var prefs = await SharedPreferences.getInstance();
@@ -91,11 +92,7 @@ class TopicService {
       }),
     );
 
-    if (response.statusCode == 201) {
-      return true;
-    } else {
-      return false;
-    }
+    return response; 
 }
 
 Future<bool> deleteTopic(int topicId) async {

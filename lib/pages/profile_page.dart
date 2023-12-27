@@ -12,6 +12,7 @@ import 'package:logging/logging.dart';
 import '../services/auth_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 
 
@@ -87,7 +88,7 @@ class _ProfilePageState extends State<ProfilePage> {
   required String title,
   required TextEditingController nameController,
   required TextEditingController descriptionController,
-  required Future<bool> Function(String, String, String) createFunction,
+  required Future<http.Response> Function(String, String, String) createFunction,
   required String initialGroupValue,
 }) {
   String localGroupValue = initialGroupValue;
@@ -138,14 +139,19 @@ class _ProfilePageState extends State<ProfilePage> {
           TextButton(
             child: Text('Confirm'),
             onPressed: () async {
-              var success = await createFunction(
+              var response = await createFunction(
                 nameController.text,
                 descriptionController.text,
                 localGroupValue,
               );
-              if (success) {
+              if (response.statusCode == 201) {
                 Navigator.of(context).pop();
                 refreshData();
+              } else {
+                Navigator.of(context).pop(); // Close the dialog
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error: ${response.body}')),
+                );
               }
             },
           ),

@@ -61,6 +61,9 @@ class HelpPage extends StatelessWidget {
             Text(
               'Why it is not sending through? ANS:::: there are max lengths. Currently, 50 chars for topic/collection titles, 100 chars for a front/back of a card.',
             ),
+            Text(
+                'How much data can i store? ANS::::: right now, 10 collections, 40 topics, 200 items in each topic', 
+            ),
             // ... more content as needed
           ],
         ),

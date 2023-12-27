@@ -35,41 +35,47 @@ class _EditTopicPage1State extends State<EditTopicPage1> {
   }
 
   Future<void> submitChanges() async {
-    setState(() {
-      _isSubmitting = true;
-      _showSuccess = false;
-      _showError = false;
-    });
+  setState(() {
+    _isSubmitting = true;
+    _showSuccess = false;
+    _showError = false;
+  });
 
-    var frontItems = _frontController.text.split(_selectedDelimiter);
-    var backItems = _backController.text.split(_selectedDelimiter);
+  var frontItems = _frontController.text.split(_selectedDelimiter);
+  var backItems = _backController.text.split(_selectedDelimiter);
 
-    if (frontItems.length != backItems.length) {
-      // Show error for item count mismatch
-      // ... Error handling code ...
-      return;
-    }
-
-    var items = List<List<String>>.generate(frontItems.length, (index) {
-      return [
-        frontItems[index].trim(),
-        backItems[index].trim()
-      ];
-    });
-
-    ItemService itemService = ItemService();
-    bool success = await itemService.addItemsToTopic(widget.topic.id, items);
-
-    if (success) {
-      _showSuccess = true;
-    } else {
-      _showError = true;
-    }
-
+  if (frontItems.length != backItems.length) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Mismatch in item count')),
+    );
     setState(() {
       _isSubmitting = false;
+      _showError = true;
     });
+    return;
   }
+
+  var items = List<List<String>>.generate(frontItems.length, (index) {
+    return [frontItems[index].trim(), backItems[index].trim()];
+  });
+
+  ItemService itemService = ItemService();
+  var result = await itemService.addItemsToTopic(widget.topic.id, items);
+
+  if (result['success']) {
+    _showSuccess = true;
+  } else {
+    _showError = true;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: ${result['message']}')),
+    );
+  }
+
+  setState(() {
+    _isSubmitting = false;
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {

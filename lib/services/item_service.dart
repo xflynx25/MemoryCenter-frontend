@@ -6,7 +6,7 @@ import '../models/item.dart';
 import '../models/editing_item.dart';
 
 class ItemService {
-  Future<bool> editItemsInTopic(int topicId, List<EditingItem> items) async {
+  Future<Map<String, dynamic>> editItemsInTopic(int topicId, List<EditingItem> items) async {
     var url = Uri.parse('${Config.HOST}/api/edit_items_in_topic_full/');
     var prefs = await SharedPreferences.getInstance();
     var accessToken = prefs.getString('accessToken') ?? '';
@@ -29,7 +29,11 @@ class ItemService {
       }),
     );
 
-    return response.statusCode == 200;
+        if (response.statusCode == 200) {
+            return {"success": true};
+            } else {
+            return {"success": false, "message": response.body};
+            }
   }
 
   Future<List<EditingItem>> getItems(int topicId) async {
@@ -57,7 +61,7 @@ class ItemService {
     }
   }
 
-  Future<bool> addItemsToTopic(int topicId, List<List<String>> items) async {
+  Future<Map<String, dynamic>> addItemsToTopic(int topicId, List<List<String>> items) async {
     var url = Uri.parse('${Config.HOST}/api/add_items_to_topic/');
     var prefs = await SharedPreferences.getInstance();
     var accessToken = prefs.getString('accessToken') ?? '';
@@ -74,7 +78,12 @@ class ItemService {
       }),
     );
 
-    return response.statusCode == 200;
+
+    if (response.statusCode == 200) {
+        return {"success": true};
+        } else {
+        return {"success": false, "message": response.body};
+        }
   }
 
   // Other methods like addItemsToTopic, deleteItem etc. can be added here.

@@ -55,13 +55,16 @@ Future<void> submitChanges() async {
   });
 
   ItemService itemService = ItemService();
-  bool success = await itemService.editItemsInTopic(widget.topic.id, items);
+  var result = await itemService.editItemsInTopic(widget.topic.id, items);
 
-  if (success) {
+  if (result['success']) {
     _showSuccess = true;
     fetchUpdatedItems();
   } else {
     _showError = true;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: ${result['message']}')),
+    );
   }
 
   setState(() {

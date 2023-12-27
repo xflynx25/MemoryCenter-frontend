@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/config.dart';
 import '../models/collection.dart';
 import '../models/card_item.dart';
+import 'package:http/http.dart' as http;
 
 
 
@@ -33,7 +34,7 @@ class CollectionService {
     }
   }
 
-  Future<bool> createCollection(String collectionName, String description, String visibility) async {
+  Future<http.Response> createCollection(String collectionName, String description, String visibility) async {
     var url = Uri.parse('${Config.HOST}/api/create_collection/');
 
     var prefs = await SharedPreferences.getInstance();
@@ -52,11 +53,7 @@ class CollectionService {
       }),
     );
 
-    if (response.statusCode == 201) {
-      return true;
-    } else {
-      return false;
-    }
+    return response;
   }
 
 Future<bool> deleteCollection(int collectionId) async {
