@@ -4,7 +4,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class Config {
-  static const DEBUG = false; // Set to false in production
+  static const DEBUG = true; // Set to false in production
 
   // API backends
   static const String DEFAULT_API_BACKEND = 'http://127.0.0.1:8000';

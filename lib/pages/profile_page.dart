@@ -87,7 +87,9 @@ class _ProfilePageState extends State<ProfilePage> {
   void refreshData() {
     setState(() {
       futureUser = UserService().getUser(widget.userId);
-      futureTopics = TopicService().getAllTopics(widget.userId);
+      futureTopics = _fetchSortedTopics(); // Refresh sorted topics
+
+      //futureTopics = TopicService().getAllTopics(widget.userId);
       futureCollections = CollectionService().getAllCollections(widget.userId);
     });
   }
@@ -456,9 +458,9 @@ Widget _buildPageContent() {
                                       ),
                                       // Add play button next to edit and delete buttons
                                       IconButton(
-                                        icon: const Icon(Icons.play_arrow),  // Play icon
-                                        onPressed: () {
-                                          Navigator.pushNamed(
+                                        icon: Icon(Icons.play_arrow),  // Play icon
+                                        onPressed: () async {
+                                          await Navigator.pushNamed(
                                             context, 
                                             '/play_page', 
                                             arguments: {'collection': collections[index]}
@@ -466,7 +468,6 @@ Widget _buildPageContent() {
                                           refreshData();
                                         },
                                       ),
-
                                     ],
                                   )
                                 : Container(),

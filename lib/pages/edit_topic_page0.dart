@@ -93,69 +93,62 @@ void addMoreItems() {
 Widget build(BuildContext context) {
   return TopicEditor(
     topic: widget.topic,
-    child: Center(
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            flex: 3,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Spacer(flex: 1),
-                Expanded(
-                  flex: 8,
-                  child: ElevatedButton(
-                    child: const Text('Submit changes', style: TextStyle(color: Colors.white)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(80),
-                      ),
-                    ),
-                    onPressed: _isSubmitting ? null : submitChanges,
-                  ),
-                ),
-                Spacer(flex: 1),
-                if (_showSuccess) Icon(Icons.check_circle, color: Colors.green),
-                if (_showError) Icon(Icons.error, color: Colors.red),
-                Spacer(flex: 8),
-                Expanded(
-                  flex: 8,
-                  child: ElevatedButton(
-                    child: Text('Add ${Config.EDIT_TOPIC_0_BLANK_ITEMS} more blanks'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(80),
-                      ),
-                    ),
-                    onPressed: addMoreItems,
-                  ),
-                ),
-                Spacer(flex: 1),
-              ],
-            ),
+    child: Column(
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text(
+            "If this page isn't updating properly after using a different editing method, please return to the profile page and come back. We apologize for the inconvenience.",
+            style: TextStyle(color: Colors.red, fontStyle: FontStyle.italic),
+            textAlign: TextAlign.center,
           ),
-          // 70% width for text table
-          Expanded(
-            flex: 7,
-            child: FractionallySizedBox(
-              widthFactor: 0.9, // Controls the width
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: items.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Container(
-                          margin: const EdgeInsets.all(6.0), // Smaller margin
-                          padding: const EdgeInsets.all(6.0), // Smaller padding
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200], // Change this color to your preference
-                            border: Border.all(color: Colors.grey[500]!), // Change this color to your preference
-                            borderRadius: BorderRadius.circular(5.0),
-                          ),
+        ),
+        Expanded(
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                flex: 3,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      child: const Text('Submit changes', style: TextStyle(color: Colors.white)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(80),
+                        ),
+                      ),
+                      onPressed: _isSubmitting ? null : submitChanges,
+                    ),
+                    if (_showSuccess) Icon(Icons.check_circle, color: Colors.green),
+                    if (_showError) Icon(Icons.error, color: Colors.red),
+                    ElevatedButton(
+                      child: Text('Add ${Config.EDIT_TOPIC_0_BLANK_ITEMS} more blanks'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(80),
+                        ),
+                      ),
+                      onPressed: addMoreItems,
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 7,
+                child: ListView.builder(
+                  itemCount: items.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Container(
+                      margin: const EdgeInsets.all(6.0),
+                      padding: const EdgeInsets.all(6.0),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        border: Border.all(color: Colors.grey[500]!),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
                           child: Row(
                             children: <Widget>[
                               Text(
@@ -214,18 +207,16 @@ Widget build(BuildContext context) {
                                 },
                               ),
                             ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     ),
   );
-}}
-
+}
+}
