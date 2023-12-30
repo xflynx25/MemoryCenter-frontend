@@ -49,7 +49,7 @@ class _EditCollectionPageState extends State<EditCollectionPage> {
         body: Padding(  
           padding: EdgeInsets.symmetric(
             vertical: MediaQuery.of(context).size.height * 0.05,
-            horizontal: MediaQuery.of(context).size.width * 0.2,
+            horizontal: MediaQuery.of(context).size.width * 0.05,
           ),
           child: FutureBuilder<List<Topic>>(
             future: widget.futureTopics,
@@ -234,7 +234,7 @@ Widget _buildTopicRow(Topic topic, String status) {
                     selectedColor: Colors.red,
                   ),
                   ChoiceChip(
-                    label: Text('Not Selected'),
+                    label: Text('NA'),
                     selected: status == 'not_selected',
                     onSelected: (bool selected) {
                       setState(() {
