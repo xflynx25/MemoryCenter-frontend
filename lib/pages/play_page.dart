@@ -156,7 +156,9 @@ void changeCard(int change) {
 
     _logger.info('Fetching card items for collection ${widget.collection.id}');
       try {
-      List<CardItem> fetchedCardItems = await CollectionService().fetchNFromCollection(widget.collection.id, Config.FETCH_NUMBER);
+          List<CardItem> fetchedCardItems = await CollectionService().fetchNFromCollection(
+                widget.collection.id, Config.N_OLD, Config.N_ZERO
+              );      
 
       // remove the duplicate
       if (numCardsToRemove > 0 && fetchedCardItems.isNotEmpty) {

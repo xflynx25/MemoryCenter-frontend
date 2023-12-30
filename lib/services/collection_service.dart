@@ -79,9 +79,9 @@ Future<bool> deleteCollection(int collectionId) async {
       return false;
     }
   }
-
-Future<List<CardItem>> fetchNFromCollection(int collectionId, int n) async {
-  var url = Uri.parse('${Config.HOST}/api/fetch_n_from_collection/?collection_id=$collectionId&n=$n');
+  
+Future<List<CardItem>> fetchNFromCollection(int collectionId, int nOld, int nZero) async {
+  var url = Uri.parse('${Config.HOST}/api/fetch_n_from_collection/?collection_id=$collectionId&n_old=$nOld&n_zero=$nZero');
 
   var prefs = await SharedPreferences.getInstance();
   var accessToken = prefs.getString('accessToken');
@@ -99,7 +99,7 @@ Future<List<CardItem>> fetchNFromCollection(int collectionId, int n) async {
     return body.map((dynamic item) => CardItem.fromJson(item)).toList();
   } else if (response.statusCode == 405){
     throw Exception('No More Items');
-    }else {
+  } else {
     throw Exception('Failed to fetch card items');
   }
 }

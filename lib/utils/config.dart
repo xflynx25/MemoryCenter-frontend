@@ -4,7 +4,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class Config {
-  static const DEBUG = true; // Set to false in production
+  static const DEBUG = false; // Set to false in production
 
   // API backends
   static const String DEFAULT_API_BACKEND = 'http://127.0.0.1:8000';
@@ -29,7 +29,8 @@ class Config {
 
   static const MAX_ITEMS_IN_TOPIC = 10000;
   static const EDIT_TOPIC_0_BLANK_ITEMS = 10;
-  static const FETCH_NUMBER = 20; // how many to fetch at a time
+  static const N_ZERO = 10; //for fetching at a time
+  static const N_OLD = 10;  //for fetching at a time
   static const FETCH_INTERVAL = 10; // bad name, it is how many seconds you send the scores  
   static const FETCH_AT_HOW_MANY_LEFT = 1; // how many left when you fetch new ones (you will get repeats of whatever you just studied and score hasn't been updated) tradeoff of loading screen vs repeats
   
