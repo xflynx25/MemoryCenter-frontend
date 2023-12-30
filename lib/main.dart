@@ -20,7 +20,7 @@ import 'pages/play_page.dart';
 import 'models/collection.dart';
 import 'models/topic.dart';
 
-import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb; // Import kIsWeb
 import 'dart:developer' as developer;
 import 'package:logging/logging.dart';
 final _logger = Logger('MainLogging');
@@ -32,7 +32,7 @@ void main() async {
 
   // FIREBASE TOOLS
 
-  if (!Platform.isIOS) {
+  if (kIsWeb) {
 
   await Firebase.initializeApp(
     options: FirebaseOptions(

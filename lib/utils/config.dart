@@ -1,9 +1,32 @@
+
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 class Config {
-  //static String get HOST => dotenv.env['HOST'] ?? 'http://127.0.0.1:8000'; // localhost if we don't provide host
-  //static const HOST = 'http://127.0.0.1:8000';
-  static const HOST = 'http://0.0.0.0:8000'; 
-  //static const HOST = 'https://memory-center-backend-0c697b5afd37.herokuapp.com';
+  static const DEBUG = true; // Set to false in production
+
+  // API backends
+  static const String DEFAULT_API_BACKEND = 'http://127.0.0.1:8000';
+  static const String PRODUCTION_API_BACKEND = 'https://memory-center-backend-0c697b5afd37.herokuapp.com';
+  static const String ANDROID_API_BACKEND = 'http://10.0.2.2:8000';
+  static const String IOS_API_BACKEND = 'http://localhost:8000';
+  static const String WEB_API_BACKEND = 'http://localhost:8000';
+
+  // Gets the appropriate API backend based on platform and debug mode
+  static String get HOST {
+    if (DEBUG) {
+      if (kIsWeb) {
+        return WEB_API_BACKEND;
+      } else if (Platform.isAndroid) {
+        return ANDROID_API_BACKEND;
+      } else if (Platform.isIOS) {
+        return IOS_API_BACKEND;
+      }
+    }
+    return PRODUCTION_API_BACKEND;
+  }
+
   static const MAX_ITEMS_IN_TOPIC = 10000;
   static const EDIT_TOPIC_0_BLANK_ITEMS = 10;
   static const FETCH_NUMBER = 20; // how many to fetch at a time
@@ -25,4 +48,3 @@ class Config {
     "0", "1", "2", "3", "4", "S", 
   ];
 }
-
