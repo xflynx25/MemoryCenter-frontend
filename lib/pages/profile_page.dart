@@ -364,7 +364,7 @@ Widget _buildPageContent() {
                   itemBuilder: (context, index) {
                     return Center(
                       child: Container(
-                        width: MediaQuery.of(context).size.width * 0.6,
+  width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.width > 600 ? 0.6 : 0.9),
                         child: Card(
                           child: Container(
                             decoration: BoxDecoration(
@@ -559,7 +559,7 @@ DataFutureBuilder<Topic>(
           margin: EdgeInsets.symmetric(vertical: 6.0), // Adjust the value as needed
           child: Center(
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.6, // Adjust to fit the IconButton
+  width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.width > 600 ? 0.6 : 0.9),
             child: Card(
               child: Column(
                 children: [
