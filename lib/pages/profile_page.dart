@@ -325,27 +325,7 @@ Widget _buildPageContent() {
                       },
                     ),
                   ),
-                  Expanded(
-                    child: Row(
-                      children: <Widget>[
-                        for (int i = 0; i < Config.SCORE_COLORS.length; i++)
-                          Expanded(
-                            child: FractionallySizedBox(
-                              widthFactor: 1, // For example, 25% of the available space
-                              child: ListTile(
-                                leading: Container(
-                                  width: 24,
-                                  height: 24,
-                                  color: Config.SCORE_COLORS[i],
-                                ),
-                                title: Text(Config.SCORE_TEXTS[i]),
-                              ),
-                            ),
-                          ),
-
-                      ],
-                    ),
-                  ),
+                  Text("w.r.t. Colors \n Darker Better - Yellow Best")
 
                 ],
               ),

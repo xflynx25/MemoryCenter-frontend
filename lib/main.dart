@@ -16,17 +16,24 @@ import 'pages/edit_topic_page1.dart';
 import 'pages/edit_topic_page2.dart';
 import 'pages/play_page.dart';
 
+
 import 'models/collection.dart';
 import 'models/topic.dart';
 
+import 'dart:io' show Platform;
 import 'dart:developer' as developer;
 import 'package:logging/logging.dart';
 final _logger = Logger('MainLogging');
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensures plugin services are initialized.
 
   // FIREBASE TOOLS
+
+  if (!Platform.isIOS) {
+
   await Firebase.initializeApp(
     options: FirebaseOptions(
       apiKey: "AIzaSyCoiiGnhtU22eMB8Hvi3KRlmJTKi-35rT4",
@@ -38,6 +45,7 @@ void main() async {
       measurementId: "G-8TDYK940L9"
     ),
   );
+  }
   
   // Initialize logger, debug prints etc.
   _initializeLogging();
