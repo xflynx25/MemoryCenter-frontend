@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../widgets/score_distribution_bar.dart';  // Adjust the import based on your project structure
+import '../widgets/dotted_line.dart';  
 
 
 
@@ -55,6 +56,9 @@ class _ProfilePageState extends State<ProfilePage> {
   
   SortingMethod _currentSortingMethod = SortingMethod.defaultOrder;
 
+  bool _showTopics = false; // New variable to manage topics display toggle
+
+
 
   Future<int?> get loggedInUserId async {
     var prefs = await SharedPreferences.getInstance();
@@ -71,7 +75,7 @@ class _ProfilePageState extends State<ProfilePage> {
     _logger.info('PROFILEPAGEINIT');
     super.initState();
     _fetchLoggedInUserId();
-    refreshData();
+    refreshData(initialLoad: true); // Pass an initial load flag
   }
 
   
@@ -84,12 +88,13 @@ class _ProfilePageState extends State<ProfilePage> {
     super.dispose();
   }
 
-  void refreshData() {
+  void refreshData({bool initialLoad = false}) {
     setState(() {
       futureUser = UserService().getUser(widget.userId);
-      futureTopics = _fetchSortedTopics(); // Refresh sorted topics
-
-      //futureTopics = TopicService().getAllTopics(widget.userId);
+      if (_showTopics || initialLoad) {
+              futureTopics = _fetchSortedTopics(); // in effect this is operating as getting the items
+      }
+      //futureTopics = TopicService().getAllTopics(widget.userId); // later we can use this to also get just the topics, 
       futureCollections = CollectionService().getAllCollections(widget.userId);
     });
   }
@@ -268,6 +273,200 @@ void _showTopicInfoDialog(Topic topic) {
     },
   );
 }
+
+
+
+
+
+
+
+
+
+
+// Method to build topics section
+  Widget _buildTopicsSection() {
+    return Column(
+      children: [
+              Row(
+                children: <Widget>[
+                  IconButton(
+                    icon: Icon(Icons.add, color: Colors.transparent), // Invisible Icon
+                    onPressed: () {},
+                  ),
+                  Spacer(),
+                  Text('Topics', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+
+
+                 (_loggedInUserId != null && widget.userId == _loggedInUserId) ? 
+                  IconButton(
+                    icon: Icon(Icons.add),
+                    onPressed: _showAddTopicDialog,
+                  )
+                  : Container(),
+
+                  Spacer(),
+                ],
+              ),
+
+              
+            // New Row for the Sorting Dropdown
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8.0),
+                  color: Colors.white, // Optional: Change the background color
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text('Sort Items in Topics By: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                    DropdownButton<SortingMethod>(
+                      value: _currentSortingMethod,
+                      underline: Container(), // Removes underline of DropdownButton
+                      onChanged: (SortingMethod? newValue) {
+                        setState(() {
+                          _currentSortingMethod = newValue ?? SortingMethod.defaultOrder;
+                          futureTopics = _fetchSortedTopics(); // Refresh sorted topics
+                        });
+                      },
+                      items: SortingMethod.values.map((SortingMethod method) {
+                        return DropdownMenuItem<SortingMethod>(
+                          value: method,
+                          child: Text(_formatSortingMethodName(method)),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+
+
+
+DataFutureBuilder<Topic>(
+  future: _fetchSortedTopics(),
+  dataBuilder: (BuildContext context, List<Topic> topics) {
+    _logger.warning('IN ITEMBUILDER OF TOPICS');
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: topics.length,
+      itemBuilder: (context, index) {
+        Topic topic = topics[index]; // for use in the info section
+        Map<int, double> distribution = calculateScoreDistribution(topic); // for coloring books
+
+        // Add margin here
+        return Container(
+          margin: EdgeInsets.symmetric(vertical: 6.0), // Adjust the value as needed
+          child: Center(
+          child: Container(
+  width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.width > 600 ? 0.6 : 0.9),
+            child: Card(
+              child: Column(
+                children: [
+                  ScoreDistributionBar(distribution: distribution),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey, width: 1),
+                    ),
+                    child: Row(
+                      children: <Widget>[
+                        IconButton(
+                          icon: Icon(Icons.info_outline),
+                          onPressed: () => _showTopicInfoDialog(topic),
+                        ),
+                        Expanded(
+                          child: ExpansionTile(
+                            title: Text(topics[index].topicName),
+                            children: <Widget>[
+                              ListView.builder(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                itemCount: topics[index].items.length,
+                                itemBuilder: (BuildContext context, int innerIndex) {
+                                  return ListTile(
+                                    tileColor: Config.SCORE_COLORS[topics[index].items[innerIndex].score],
+                                    title: Text(topics[index].items[innerIndex].front),
+                                    subtitle: Text(topics[index].items[innerIndex].back),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (_loggedInUserId != null && (topics[index].user == _loggedInUserId || topics[index].visibility == 'global_edit'))
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              IconButton(
+                                icon: Icon(Icons.edit),
+                                onPressed: () async {
+                                  await Navigator.pushNamed(context, '/edit_topic0', arguments: topics[index]);
+                                  refreshData();
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete),
+                                onPressed: () async {
+                                  final confirm = await showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text('Confirm'),
+                                        content: const Text('Are you sure you want to delete this topic?'),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(true),
+                                            child: const Text('DELETE'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(false),
+                                            child: const Text('CANCEL'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                  if (confirm) {
+                                    final success = await TopicService().deleteTopic(topics[index].id);
+                                    if (success) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Topic deleted successfully')),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Failed to delete topic')),
+                                      );
+                                    }
+                                    refreshData();
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          ),
+        );
+      },
+    );
+  },
+),
+      ],
+    );
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -483,181 +682,44 @@ Widget _buildPageContent() {
             ),
 
 
-
-              Row(
-                children: <Widget>[
-                  IconButton(
-                    icon: Icon(Icons.add, color: Colors.transparent), // Invisible Icon
-                    onPressed: () {},
-                  ),
-                  Spacer(),
-                  Text('Topics', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-
-
-                 (_loggedInUserId != null && widget.userId == _loggedInUserId) ? 
-                  IconButton(
-                    icon: Icon(Icons.add),
-                    onPressed: _showAddTopicDialog,
-                  )
-                  : Container(),
-
-                  Spacer(),
-                ],
-              ),
-
-
-
-            // New Row for the Sorting Dropdown
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8.0),
-                  color: Colors.white, // Optional: Change the background color
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text('Sort Items in Topics By: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                    DropdownButton<SortingMethod>(
-                      value: _currentSortingMethod,
-                      underline: Container(), // Removes underline of DropdownButton
-                      onChanged: (SortingMethod? newValue) {
-                        setState(() {
-                          _currentSortingMethod = newValue ?? SortingMethod.defaultOrder;
-                          futureTopics = _fetchSortedTopics(); // Refresh sorted topics
-                        });
-                      },
-                      items: SortingMethod.values.map((SortingMethod method) {
-                        return DropdownMenuItem<SortingMethod>(
-                          value: method,
-                          child: Text(_formatSortingMethodName(method)),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-DataFutureBuilder<Topic>(
-  future: _fetchSortedTopics(),
-  dataBuilder: (BuildContext context, List<Topic> topics) {
-    _logger.warning('IN ITEMBUILDER OF TOPICS');
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemCount: topics.length,
-      itemBuilder: (context, index) {
-        Topic topic = topics[index]; // for use in the info section
-        Map<int, double> distribution = calculateScoreDistribution(topic); // for coloring books
-
-        // Add margin here
-        return Container(
-          margin: EdgeInsets.symmetric(vertical: 6.0), // Adjust the value as needed
-          child: Center(
-          child: Container(
-  width: MediaQuery.of(context).size.width * (MediaQuery.of(context).size.width > 600 ? 0.6 : 0.9),
-            child: Card(
-              child: Column(
-                children: [
-                  ScoreDistributionBar(distribution: distribution),
-                  Container(
+            // Toggle for displaying topics
+            Center(
+              child: FractionallySizedBox(
+                widthFactor: 0.6,  // Adjusts the width to 60% of the screen width
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey, width: 1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.fromBorderSide(BorderSide(style: BorderStyle.none)),
                     ),
-                    child: Row(
-                      children: <Widget>[
-                        IconButton(
-                          icon: Icon(Icons.info_outline),
-                          onPressed: () => _showTopicInfoDialog(topic),
-                        ),
-                        Expanded(
-                          child: ExpansionTile(
-                            title: Text(topics[index].topicName),
-                            children: <Widget>[
-                              ListView.builder(
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                itemCount: topics[index].items.length,
-                                itemBuilder: (BuildContext context, int innerIndex) {
-                                  return ListTile(
-                                    tileColor: Config.SCORE_COLORS[topics[index].items[innerIndex].score],
-                                    title: Text(topics[index].items[innerIndex].front),
-                                    subtitle: Text(topics[index].items[innerIndex].back),
-                                  );
-                                },
-                              ),
-                            ],
+                    child: Column(
+                      children: [
+                        DottedLine(color: Colors.grey),
+                        ListTile(
+                          title: Text('Load and Show Topics'),
+                          trailing: Switch(
+                            value: _showTopics,
+                            onChanged: (bool value) {
+                              setState(() {
+                                _showTopics = value;
+                                if (_showTopics) {
+                                  futureTopics = _fetchSortedTopics();
+                                }
+                              });
+                            },
                           ),
                         ),
-                        if (_loggedInUserId != null && (topics[index].user == _loggedInUserId || topics[index].visibility == 'global_edit'))
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              IconButton(
-                                icon: Icon(Icons.edit),
-                                onPressed: () async {
-                                  await Navigator.pushNamed(context, '/edit_topic0', arguments: topics[index]);
-                                  refreshData();
-                                },
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.delete),
-                                onPressed: () async {
-                                  final confirm = await showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: const Text('Confirm'),
-                                        content: const Text('Are you sure you want to delete this topic?'),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            onPressed: () => Navigator.of(context).pop(true),
-                                            child: const Text('DELETE'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () => Navigator.of(context).pop(false),
-                                            child: const Text('CANCEL'),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                  if (confirm) {
-                                    final success = await TopicService().deleteTopic(topics[index].id);
-                                    if (success) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Topic deleted successfully')),
-                                      );
-                                    } else {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Failed to delete topic')),
-                                      );
-                                    }
-                                    refreshData();
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
+                        DottedLine(color: Colors.grey),
                       ],
                     ),
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-          ),
-        );
-      },
-    );
-  },
-),
 
+            // Conditionally render topics section
+            if (_showTopics) _buildTopicsSection(),
 
 
 
