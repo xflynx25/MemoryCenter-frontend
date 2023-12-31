@@ -1,6 +1,6 @@
 1. (SOLVED) trailing delimiters produce an extra blank card
 2. (SOLVED) heroku seems to be going down on big inputs, only 30 chars or less for front / back 
-3. we fetch everything when we hit the profile, would be better to just load the items when they try to extend
+3. (SOLVED PARTIALLY [see 12]) we fetch everything when we hit the profile, would be better to just load the items when they try to extend
 4. (SOLVED) people can send unlimited stuff, we should be limiting them
 5. (SOLVED) the last item problem, what we could do is to not take the first N items, when we are fetching with N left, therefore we won't repeat. 
 5.5 (SOLVED) additionally, doesn't seem like we randomize the order once we pull in, which results in this determinism which is unpleasant. 

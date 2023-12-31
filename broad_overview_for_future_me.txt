@@ -1,0 +1,13 @@
+issue tracking in issues.txt rn 
+
+weird problems with dart:io platform only can be used in ios, so need to make sure never called for web 
+
+flutter uses this widget setup thing, pretty intuitive nested building of stuff 
+need to watch out for dev for computer and then overflowing on phone 
+
+also some heinous problems with my bad implementation of the navbar 
+firebase also will be annoying if we ever have to use it, because of the weird import errors that matt nay was having as well 
+
+of course when you ask permissions in ios, remember we are going to need to change the plist or something to give the reason (think 6.5660)
+
+but the readme should be pretty good
